@@ -25,4 +25,5 @@ export default {
 div {
   margin-top: 80px;
 }
+
 </style>
