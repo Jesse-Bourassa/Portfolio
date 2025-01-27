@@ -13,6 +13,7 @@ declare module 'vue' {
     Card: typeof import('primevue/card')['default']
     ColorPicker: typeof import('primevue/colorpicker')['default']
     copy: typeof import('./src/components/ProfileCard copy.vue')['default']
+    Experience: typeof import('./src/components/Experience.vue')['default']
     InputText: typeof import('primevue/inputtext')['default']
     Menubar: typeof import('primevue/menubar')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']

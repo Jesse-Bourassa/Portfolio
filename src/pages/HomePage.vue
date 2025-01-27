@@ -38,27 +38,30 @@
             repoLink="https://github.com/ZacharyLelievre/HighEnd"
           />
           <ProjectCard
-            title="ToDo App"
-            description="A simple and intuitive task management app."
-            :technologies="['React', 'Node.js', 'Express']"
-            liveLink="https://todo-app.com"
-            repoLink="https://github.com/username/todo-app"
+            title="Omegal Remake"
+            description="A remake of Omegle built to connect users through real-time text and video chat using WebRTC and WebSockets. This project helped me learn how to host applications and implement WebSocket communication for seamless, scalable interactions."
+            :technologies="['HTML', 'CSS', 'JavaScript', 'WebRTC', 'WebSockets', 'Node.js', 'Express']"
+            repoLink="https://github.com/Jesse-Bourassa/OmegalRemake"
           />
           <ProjectCard
-            title="ToDo App"
-            description="A simple and intuitive task management app."
-            :technologies="['React', 'Node.js', 'Express']"
-            liveLink="https://todo-app.com"
-            repoLink="https://github.com/username/todo-app"
-          />
-          <ProjectCard
-            title="ToDo App"
-            description="A simple and intuitive task management app."
-            :technologies="['React', 'Node.js', 'Express']"
-            liveLink="https://todo-app.com"
-            repoLink="https://github.com/username/todo-app"
+            title="Pet Clinic"
+            description="Developed and tested RESTful APIs for the Customer Service module in Pet Clinic using Spring Boot and MySQL. Implemented account management features, integrated Spring Data JPA, and ensured reliability through JUnit and Mockito testing."
+            :technologies="['Spring Boot', 'MySQL', 'Spring Data JPA', 'JUnit', 'Mockito', 'Postman']"
+            repoLink="https://github.com/cgerard321/champlain_petclinic"
           />
         </div>
+      </div>
+      </div>
+    <!-- Experience Section -->
+    <div class="spacer"></div>
+
+    <div
+        v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
+        class="card-wrapper"
+    >
+      <div class="experience-section">
+        <h2>Experience</h2>
+        <Experience404 />
       </div>
     </div>
   </div>
@@ -68,13 +71,17 @@
 import ProfileCard from "/src/components/ProfileCard.vue";
 import AboutCard from "/src/components/AboutCard.vue";
 import ProjectCard from "/src/components/ProjectCard.vue";
+import Experience404 from "/src/components/Experience.vue"
+import Spacer from "../components/Spacer.vue";
 
 export default {
   name: "HomePage",
   components: {
+    Spacer,
     ProfileCard,
     AboutCard,
     ProjectCard,
+    Experience404,
   },
 };
 </script>
@@ -109,9 +116,9 @@ export default {
   gap: 2rem;
 }
 .project-card {
-  flex: 1 1 500px; 
-  max-width: 600px; 
-  min-width: 300px; 
+  flex: 1 1 500px;
+  max-width: 600px;
+  min-width: 300px;
   box-sizing: border-box;
 }
 
