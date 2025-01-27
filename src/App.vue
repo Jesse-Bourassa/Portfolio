@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Navigation Bar -->
+    <CustomParticles />
     <NavBar />
     <router-view />
   </div>
@@ -8,8 +8,11 @@
 
 <script>
 import NavBar from './components/NavBar.vue';
+import CustomParticles from './components/Particles.vue'
+
 export default {
   components: {
+    CustomParticles,
     NavBar,
   },
   data() {
@@ -22,8 +25,6 @@ export default {
 
 <style scoped>
 
-div {
-  margin-top: 80px;
-}
+
 
 </style>

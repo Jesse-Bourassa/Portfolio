@@ -1,4 +1,4 @@
-<template>
+x<template>
     <div class="about-section">
       <h2>About Me</h2>
       <p>

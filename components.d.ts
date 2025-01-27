@@ -16,6 +16,7 @@ declare module 'vue' {
     InputText: typeof import('primevue/inputtext')['default']
     Menubar: typeof import('primevue/menubar')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
+    Particles: typeof import('./src/components/Particles.vue')['default']
     ProfileCard: typeof import('./src/components/ProfileCard.vue')['default']
     ProjectCard: typeof import('./src/components/ProjectCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
