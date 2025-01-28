@@ -1,18 +1,24 @@
 <template>
-    <div class="project-card">
-      <h3 class="project-title">{{ title }}</h3>
-      <p class="project-description">{{ description }}</p>
-      <div class="tech-stack">
-        <span v-for="tech in technologies" :key="tech" class="tech-badge">
-          {{ tech }}
-        </span>
-      </div>
-      <div class="project-links">
-        <a :href="liveLink" target="_blank" class="view-button" v-if="liveLink">Live Demo</a>
-        <a :href="repoLink" target="_blank" class="view-button" v-if="repoLink">GitHub</a>
-      </div>
+  <div class="project-card">
+    <h3 class="project-title">{{ title }}</h3>
+    <p class="project-description">{{ description }}</p>
+    <div class="tech-stack">
+      <span v-for="tech in technologies" :key="tech" class="tech-badge">
+        {{ tech }}
+      </span>
     </div>
-  </template>
+    <div class="project-links">
+      <a :href="liveLink" target="_blank" class="icon-link" v-if="liveLink">
+        <i class="pi pi-play"></i>
+        <p>Live Demo</p>
+      </a>
+      <a :href="repoLink" target="_blank" class="icon-link" v-if="repoLink">
+        <i class="pi pi-github"></i>
+        <p>GitHub</p>
+      </a>
+    </div>
+  </div>
+</template>
   
   <script>
   export default {
@@ -75,9 +81,13 @@
   }
   
   .project-title {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-  }
+  font-size: 2.5rem; /* Increased font size for larger text */
+  margin-bottom: 1rem;
+  color: #42b883; /* Green color for the title */
+  font-weight: bold; /* Make the text bold for emphasis */
+  text-align: center; /* Center-align the title */
+}
+
   
   .project-description {
     margin-bottom: 1rem;
@@ -89,14 +99,16 @@
   }
   
   .tech-badge {
-    display: inline-block;
-    margin: 0.3rem;
-    padding: 0.3rem 0.6rem;
-    background-color: #2a2a2a;
-    border-radius: 5px;
-    color: #42b883;
-    font-size: 0.9rem;
-  }
+  display: inline-block;
+  margin: 0.4rem; /* Slightly increased margin for spacing */
+  padding: 0.5rem 0.8rem; /* Increased padding for larger badges */
+  background-color: #2a2a2a;
+  border-radius: 8px; /* Larger rounding for smoother appearance */
+  color: #42b883;
+  font-size: 1.1rem; /* Increased font size */
+  font-weight: bold; /* Make the text more prominent */
+}
+
   
   .view-button {
     display: inline-block;
@@ -114,5 +126,34 @@
     background-color: #36a573;
     transform: translateY(-3px);
   }
+  .project-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.icon-link {
+  text-align: center;
+  color: #ffffff;
+  text-decoration: none;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.icon-link i {
+  font-size: 2.5rem; /* Icon size */
+  color: #42b883; /* Icon color */
+}
+
+.icon-link:hover i {
+  color: #36a573;
+  transform: scale(1.2); /* Slight zoom on hover */
+}
+
+.icon-link p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #cccccc;
+}
   </style>
   

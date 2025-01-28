@@ -1,5 +1,6 @@
 <template>
   <nav class="navbar">
+    <!-- Centered Navigation Links -->
     <ul class="nav-links">
       <li>
         <router-link to="/">
@@ -8,24 +9,17 @@
         </router-link>
       </li>
       <li>
-        <router-link to="/about">
+        <router-link to="/Blog">
           <i class="pi pi-user"></i>
-          <span>About</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link to="/projects">
-          <i class="pi pi-folder"></i>
-          <span>Projects</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link to="/contact">
-          <i class="pi pi-envelope"></i>
-          <span>Contact</span>
+          <span>Blog</span>
         </router-link>
       </li>
     </ul>
+
+    <!-- Circle on the Right -->
+    <div class="auth-circle">
+      <i class="pi pi-user"></i>
+    </div>
   </nav>
 </template>
 
@@ -36,7 +30,11 @@ export default {
 </script>
 
 <style scoped>
+/* Navbar Container */
 .navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Push nav-links and auth-circle apart */
   padding: 1rem;
   position: fixed;
   top: 0;
@@ -48,12 +46,12 @@ export default {
   z-index: 10;
 }
 
+/* Navigation Links */
 .nav-links {
   list-style: none;
-  margin: 0;
+  margin: 0 auto; /* Center the links horizontally */
   padding: 0;
   display: flex;
-  justify-content: center;
   gap: 2rem;
 }
 
@@ -80,10 +78,30 @@ export default {
   box-shadow: 0px 2px 20px rgba(66, 184, 131, 0.5);
 }
 
-.nav-links a span {
-  display: inline-block;
+/* Authentication Circle on the Right */
+.auth-circle {
+  background: rgba(255, 255, 255, 0.1);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.auth-circle:hover {
+  transform: scale(1.1);
+  box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.2);
+}
+
+.auth-circle i {
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+/* Icon Styling */
 .pi {
   font-size: 1.2rem;
 }

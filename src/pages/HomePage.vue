@@ -56,7 +56,7 @@
     <div class="spacer"></div>
 
     <div
-        v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
+        v-animateonscroll="{ enterClass: 'animate-fadeleft', leaveClass: 'animate-fadeoutleft' }"
         class="card-wrapper"
     >
       <div class="experience-section">
@@ -121,35 +121,19 @@ export default {
   min-width: 300px;
   box-sizing: border-box;
 }
-
-/* Fade animations */
-.animate-fadein {
-  animation: fadein 1s forwards;
+/* Hide scrollbar for all browsers */
+body {
+  overflow-y: scroll; /* Keeps content scrollable */
 }
 
-.animate-fadeout {
-  animation: fadeout 1s forwards;
+body::-webkit-scrollbar {
+  width: 0; /* Removes scrollbar width */
+  height: 0; /* Removes horizontal scrollbar (if needed) */
 }
 
-@keyframes fadein {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+body {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
 
-@keyframes fadeout {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-}
 </style>

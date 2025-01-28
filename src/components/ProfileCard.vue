@@ -50,4 +50,5 @@ export default {
 .profile-picture:hover {
   transform: scale(1.15);
 }
+
 </style>

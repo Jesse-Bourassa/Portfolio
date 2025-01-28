@@ -8,13 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AboutCard: typeof import('./src/components/AboutCard.vue')['default']
-    Avatar: typeof import('primevue/avatar')['default']
     Button: typeof import('primevue/button')['default']
-    Card: typeof import('primevue/card')['default']
-    ColorPicker: typeof import('primevue/colorpicker')['default']
-    copy: typeof import('./src/components/ProfileCard copy.vue')['default']
     Experience: typeof import('./src/components/Experience.vue')['default']
-    InputText: typeof import('primevue/inputtext')['default']
     Menubar: typeof import('primevue/menubar')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
     Particles: typeof import('./src/components/Particles.vue')['default']
