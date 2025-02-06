@@ -1,6 +1,7 @@
 <script>
 import 'primeicons/primeicons.css'
 </script>
+
 <template>
   <div class="social-links">
     <div class="icon-link">
@@ -38,8 +39,8 @@ import 'primeicons/primeicons.css'
 }
 
 .icon-link i {
-  font-size: 3rem; /* Icon size */
-  color: #42b883; /* Change icon color to green */
+  font-size: 3rem;
+  color: #42b883; 
   transition: color 0.3s ease, transform 0.3s ease;
 }
 

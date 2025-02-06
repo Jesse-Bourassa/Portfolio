@@ -8,9 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AboutCard: typeof import('./src/components/AboutCard.vue')['default']
-    Button: typeof import('primevue/button')['default']
     Experience: typeof import('./src/components/Experience.vue')['default']
-    Menubar: typeof import('primevue/menubar')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
     Particles: typeof import('./src/components/Particles.vue')['default']
     ProfileCard: typeof import('./src/components/ProfileCard.vue')['default']
