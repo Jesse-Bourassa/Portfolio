@@ -11,7 +11,7 @@
       <li>
         <router-link to="/Blog">
           <i class="pi pi-user"></i>
-          <span>Blogss</span>
+          <span>Blog</span>
         </router-link>
       </li>
     </ul>
