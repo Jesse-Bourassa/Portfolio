@@ -2,7 +2,7 @@ x<template>
     <div class="about-section">
       <h2>About Me</h2>
       <p>
-  I’m Jesse Bourassa, a 
+  I’m Jesse Bourassa tesssssssssssst, a 
   <span class="highlight">Full-Stack Developer</span> with a strong ability to quickly adapt
   to <span class="highlight">new technologies</span> and <span class="highlight">frameworks</span>. 
   While I don't specialize in a single domain, I pride myself on being a 
