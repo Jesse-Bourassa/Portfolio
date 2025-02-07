@@ -1,7 +1,7 @@
 <template>
     <div class="blog-section">
       <h1>Welcome to My Blog</h1>
-      <p class="tagline">Here you'll find posts about my projects, coding tips, and more!</p>
+      <p class="tagline">Here you'll find posts about my projects, coding tips, and more! Hopfully you enjoy</p>
       <div class="blog-posts">
         <!-- Add dynamic blog post cards here -->
       </div>
