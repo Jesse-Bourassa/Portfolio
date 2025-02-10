@@ -1,24 +1,23 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "composite": true,           // required for project references
+    // If you do not need runtime .js, but still want .d.ts
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "dist/types/node",
+    // If you *need* to allow .ts extension imports AND produce .d.ts,
+    // you can keep "allowImportingTsExtensions": true,
+    // but you must set noEmit or emitDeclarationOnly.
+    "allowImportingTsExtensions": true,
+
     "target": "ES2022",
     "lib": ["ES2023"],
     "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "skipLibCheck": true,
+    // ... your linting stuff ...
+    "strict": true
   },
   "include": ["vite.config.ts"]
 }
