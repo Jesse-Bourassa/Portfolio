@@ -14,18 +14,74 @@
           <span>Blog</span>
         </router-link>
       </li>
+
+      <!-- Dashboard link visible only when logged in -->
+      <li v-if="isLoggedIn">
+        <router-link to="/Dashboard">
+          <i class="pi pi-cog"></i>
+          <span>Dashboard</span>
+        </router-link>
+      </li>
     </ul>
 
-    <!-- Circle on the Right -->
-    <div class="auth-circle">
-      <i class="pi pi-user"></i>
+    <!-- Authentication Circle on the Right -->
+    <div class="auth-circle" @click="isLoggedIn ? handleLogout() : handleLogin()">
+      <i class="pi" :class="isLoggedIn ? 'pi-lock-open' : 'pi-user'"></i>
+    </div>
+
+    <!-- Error Toast -->
+    <div v-if="showError" class="error-toast">
+      <p>{{ errorMessage }}</p>
     </div>
   </nav>
 </template>
 
 <script>
+import { ref } from 'vue';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+
 export default {
-  name: "NavBar",
+  name: 'NavBar',
+  setup() {
+    const isLoggedIn = ref(false);
+    const errorMessage = ref('');
+    const showError = ref(false);  // Control the error modal visibility
+
+    const handleLogin = async () => {
+      try {
+        const email = prompt('Enter admin email:');
+        const password = prompt('Enter admin password:');
+
+        if (!email || !password) {
+          throw new Error('Email and password are required.');
+        }
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        isLoggedIn.value = true;
+        alert('Logged in as Admin!');
+      } catch (error) {
+        errorMessage.value = 'Login failed. Please try again.';
+        showError.value = true;  // Show the error modal
+
+        setTimeout(() => {
+      showError.value = false;  // Hide error permanently
+    }, 5000);
+      }
+    };
+
+    const handleLogout = async () => {
+      await signOut(auth);
+      isLoggedIn.value = false;
+      alert('Logged out successfully.');
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      isLoggedIn.value = !!user;
+    });
+
+    return { isLoggedIn, handleLogin, handleLogout, errorMessage, showError };
+  },
 };
 </script>
 
@@ -105,4 +161,27 @@ export default {
 .pi {
   font-size: 1.2rem;
 }
+
+.error-toast {
+  position: fixed;
+  top: 10%;
+  right: 10%;
+  background: rgba(255, 50, 50, 0.9);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  font-weight: bold;
+  animation: fadeInOut 5s ease;
+}
+
+/* Fade animation */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
 </style>
