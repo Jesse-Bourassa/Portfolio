@@ -25,13 +25,23 @@
     </ul>
 
     <!-- Authentication Circle on the Right -->
-    <div class="auth-circle" @click="isLoggedIn ? handleLogout() : handleLogin()">
+    <div class="auth-circle" @click="isLoggedIn ? handleLogout() : openLoginModal()">
       <i class="pi" :class="isLoggedIn ? 'pi-lock-open' : 'pi-user'"></i>
     </div>
-
-    <!-- Error Toast -->
-    <div v-if="showError" class="error-toast">
-      <p>{{ errorMessage }}</p>
+    <!-- Login Modal -->
+    <div v-if="showLoginModal" class="custom-modal-overlay">
+      <div class="custom-modal">
+        <h2>Admin Login</h2>
+        <input type="text" v-model="loginEmail" placeholder="Enter admin email" />
+        <input type="password" v-model="loginPassword" placeholder="Enter password" />
+        <div class="modal-buttons">
+          <button @click="closeLoginModal">Cancel</button>
+          <button @click="confirmLogin">Login</button>
+        </div>
+        <div v-if="showError" class="error-toast">
+      {{ errorMessage }}
+    </div>
+      </div>
     </div>
   </nav>
 </template>
@@ -45,28 +55,37 @@ export default {
   name: 'NavBar',
   setup() {
     const isLoggedIn = ref(false);
+    const loginEmail = ref('');
+    const loginPassword = ref('');
+    const showLoginModal = ref(false);
     const errorMessage = ref('');
-    const showError = ref(false);  // Control the error modal visibility
+    const showError = ref(false);
 
-    const handleLogin = async () => {
+    const openLoginModal = () => {
+      showLoginModal.value = true;
+    };
+
+    const closeLoginModal = () => {
+      showLoginModal.value = false;
+      loginEmail.value = '';
+      loginPassword.value = '';
+    };
+
+    const confirmLogin = async () => {
       try {
-        const email = prompt('Enter admin email:');
-        const password = prompt('Enter admin password:');
-
-        if (!email || !password) {
-          throw new Error('Email and password are required.');
+        if (!loginEmail.value || !loginPassword.value) {
+          throw new Error('Both email and password are required.');
         }
 
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
         isLoggedIn.value = true;
-        alert('Logged in as Admin!');
+        closeLoginModal();
       } catch (error) {
         errorMessage.value = 'Login failed. Please try again.';
-        showError.value = true;  // Show the error modal
-
+        showError.value = true;
         setTimeout(() => {
-      showError.value = false;  // Hide error permanently
-    }, 5000);
+          showError.value = false;
+        }, 4000);
       }
     };
 
@@ -80,7 +99,18 @@ export default {
       isLoggedIn.value = !!user;
     });
 
-    return { isLoggedIn, handleLogin, handleLogout, errorMessage, showError };
+    return {
+      isLoggedIn,
+      loginEmail,
+      loginPassword,
+      showLoginModal,
+      errorMessage,
+      showError,
+      openLoginModal,
+      closeLoginModal,
+      confirmLogin,
+      handleLogout,
+    };
   },
 };
 </script>
@@ -162,26 +192,142 @@ export default {
   font-size: 1.2rem;
 }
 
+/* Error Toast */
 .error-toast {
-  position: fixed;
-  top: 10%;
-  right: 10%;
-  background: rgba(255, 50, 50, 0.9);
+  position: absolute;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 77, 77, 0.9);
   color: white;
-  padding: 1rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   z-index: 100;
   font-weight: bold;
-  animation: fadeInOut 5s ease;
+  opacity: 0;
+  animation: pop-up-bob-smooth 4s ease-in-out;
 }
 
-/* Fade animation */
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(-20px); }
-  10% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-20px); }
+/* Smooth Floaty Pop Up and Bob Animation */
+@keyframes pop-up-bob-smooth {
+  0% {
+  opacity: 1;
+    transform: translate(-50%, 400px);
+  }
+  10% {
+    transform: translate(-50%, 10px);
+  }
+  20% {
+    transform: translate(-50%, 20px);
+  }
+  30% {
+    transform: translate(-50%, 15px);
+  }
+  40% {
+    transform: translate(-50%, 20px);
+  }
+  50% {
+    transform: translate(-50%, 15px);
+  }
+  60% {
+    transform: translate(-50%, 20px);
+  }
+  70% {
+    transform: translate(-50%, 15px);
+  }
+  80% {
+    transform: translate(-50%, 0px);
+  }
+  90% {
+    transform: translate(-50%, 400px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 400px);
+  }
+}
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4); /* Reduced darkness */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
+.custom-modal {
+  position: relative;
+  background: #2e2e2e;
+  padding: 2.5rem;
+  border-radius: 16px;
+  text-align: center;
+  width: 500px;
+  max-width: 90%;
+  animation: fadeIn 0.3s ease;
+
+  /* Glowing gradient border */
+  border: 0px solid transparent;
+  background-clip: padding-box;
+  background-origin: border-box;
+  background-image: linear-gradient(#2e2e2e, #2e2e2e), 
+                    linear-gradient(135deg, #42b883, #3edc81, #50f98e);
+  animation: green-glow 3s infinite;
+}
+
+/* Add an animation to make the gradient glow */
+@keyframes green-glow {
+  0% {
+    box-shadow: 0 0 8px rgba(66, 184, 131, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(62, 220, 129, 1);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(66, 184, 131, 0.6);
+  }
+}
+
+.custom-modal h2 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+}
+.custom-modal input {
+  width: 100%;
+  padding: 1rem;
+  margin: 1rem 0;
+  border: none;
+  border-radius: 8px;
+  background: #444;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+}
+
+.modal-buttons button {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.modal-buttons button:hover {
+  background: #42b883;
+  color: #fff;
+}
 </style>
