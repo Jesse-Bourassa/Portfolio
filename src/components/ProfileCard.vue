@@ -23,10 +23,10 @@
 
     <!-- CV Buttons -->
     <div class="cv-buttons">
-      <a href="/public/Jesse_Bourassa_Resume(English).pdf" download class="cv-button">
+      <a href="/Jesse_Bourassa_Resume(English).pdf" download class="cv-button">
         <i class="pi pi-download"></i> {{ $t('downloadEnglishCV') }}
       </a>
-      <a href="/public/Jesse_Bourassa_Resume(French).pdf" download class="cv-button">
+      <a href="/Jesse_Bourassa_Resume(French).pdf" download class="cv-button">
         <i class="pi pi-download"></i> {{ $t('downloadFrenchCV') }}
       </a>
     </div>
