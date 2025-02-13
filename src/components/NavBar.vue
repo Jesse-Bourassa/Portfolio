@@ -1,28 +1,32 @@
 <template>
   <nav class="navbar">
-    <!-- Centered Navigation Links -->
+    <!-- Navigation Links (using vue-i18n keys) -->
     <ul class="nav-links">
       <li>
         <router-link to="/">
           <i class="pi pi-home"></i>
-          <span>Home</span>
+          <!-- Instead of translations.home, we do t('home') -->
+          <span>{{ t('home') }}</span>
         </router-link>
       </li>
       <li>
         <router-link to="/Blog">
           <i class="pi pi-user"></i>
-          <span>Message Board</span>
+          <span>{{ t('messageBoard') }}</span>
         </router-link>
       </li>
-
-      <!-- Dashboard link visible only when logged in -->
       <li v-if="isAdmin">
         <router-link to="/Dashboard">
           <i class="pi pi-cog"></i>
-          <span>Dashboard</span>
+          <span>{{ t('dashboard') }}</span>
         </router-link>
       </li>
     </ul>
+
+    <!-- Language Toggle Button -->
+    <button @click="toggleLanguage" class="lang-toggle">
+      {{ locale === 'en' ? '🇫🇷 FR' : '🇬🇧 EN' }}
+    </button>
 
     <!-- Authentication Circle -->
     <div class="auth-circle" @click="isAdmin ? handleLogout() : openLoginModal()">
@@ -32,15 +36,19 @@
     <!-- Login Modal -->
     <div v-if="showLoginModal" class="custom-modal-overlay">
       <div class="custom-modal">
-        <h2>Admin Login</h2>
-        <input type="email" v-model="loginEmail" placeholder="Enter admin email" />
-        <input type="password" v-model="loginPassword" placeholder="Enter password" />
+        <h2>{{ t('adminLogin') }}</h2>
+        <input type="email" v-model="loginEmail" :placeholder="t('enterEmail')" />
+        <input
+          type="password"
+          v-model="loginPassword"
+          :placeholder="t('enterPassword')"
+        />
         <div class="modal-buttons">
-          <button @click="closeLoginModal">Cancel</button>
-          <button @click="confirmLogin">Login</button>
+          <button @click="closeLoginModal">{{ t('cancel') }}</button>
+          <button @click="confirmLogin">{{ t('login') }}</button>
         </div>
         <div v-if="showError" class="error-toast">
-          {{ errorMessage }}
+          {{ t('loginError') }}
         </div>
       </div>
     </div>
@@ -48,31 +56,47 @@
 </template>
 
 <script>
-import { inject, ref, onMounted } from "vue";
-import { auth } from "../firebase";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { inject, ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { auth } from '../firebase'
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
 
 export default {
-  name: "NavBar",
+  name: 'NavBar',
   setup() {
-    // Inject the isAdmin state provided from App.vue
-    const isAdmin = inject("isAdmin");
+    // Get isAdmin from parent (provide/inject)
+    const isAdmin = inject('isAdmin')
 
-    const loginEmail = ref("");
-    const loginPassword = ref("");
-    const showLoginModal = ref(false);
-    const errorMessage = ref("");
-    const showError = ref(false);
+    // Bring in i18n so we can use t(...) and locale
+    const { t, locale } = useI18n()
+
+    // Admin login fields
+    const loginEmail = ref('')
+    const loginPassword = ref('')
+    const showLoginModal = ref(false)
+    const showError = ref(false)
+    const errorMessage = ref('')
+
+    // Make sure to read from localStorage just once
+    // Then sync with vue-i18n's locale
+    locale.value = localStorage.getItem('lang') || 'en'
+
+    // Toggle language the "vue-i18n" way
+    const toggleLanguage = () => {
+      // Switch between 'en' and 'fr'
+      locale.value = locale.value === 'en' ? 'fr' : 'en'
+      localStorage.setItem('lang', locale.value)
+    }
 
     const openLoginModal = () => {
-      showLoginModal.value = true;
-    };
+      showLoginModal.value = true
+    }
 
     const closeLoginModal = () => {
-      showLoginModal.value = false;
-      loginEmail.value = "";
-      loginPassword.value = "";
-    };
+      showLoginModal.value = false
+      loginEmail.value = ''
+      loginPassword.value = ''
+    }
 
     const confirmLogin = async () => {
       try {
@@ -80,60 +104,66 @@ export default {
           auth,
           loginEmail.value,
           loginPassword.value
-        );
-        const user = userCredential.user;
+        )
+        const user = userCredential.user
 
-        if (user.email === "jesse.bou@outlook.com" || user.email === "am@am.com") {
-          localStorage.setItem("isAdmin", "true");
-          isAdmin.value = true; // This updates the reactive shared state
-          closeLoginModal();
+        // Check if user is authorized
+        if (user.email === 'jesse.bou@outlook.com' || user.email === 'am@am.com') {
+          localStorage.setItem('isAdmin', 'true')
+          isAdmin.value = true
+          closeLoginModal()
         } else {
-          throw new Error("Unauthorized user.");
+          throw new Error('Unauthorized user.')
         }
       } catch (error) {
-        errorMessage.value = "Login failed. Please check your credentials.";
-        showError.value = true;
+        errorMessage.value = 'Login failed. Please check your credentials.'
+        showError.value = true
         setTimeout(() => {
-          showError.value = false;
-        }, 4000);
+          showError.value = false
+        }, 4000)
       }
-    };
+    }
 
     const handleLogout = async () => {
-      await signOut(auth);
-      localStorage.removeItem("isAdmin");
-      isAdmin.value = false; // Update the shared state
-    };
+      await signOut(auth)
+      localStorage.removeItem('isAdmin')
+      isAdmin.value = false
+    }
 
     onMounted(() => {
       onAuthStateChanged(auth, (user) => {
-        if (user && (user.email === "jesse.bou@outlook.com" || user.email === "am@am.com")) {
-          localStorage.setItem("isAdmin", "true");
-          isAdmin.value = true;
+        if (
+          user &&
+          (user.email === 'jesse.bou@outlook.com' || user.email === 'am@am.com')
+        ) {
+          localStorage.setItem('isAdmin', 'true')
+          isAdmin.value = true
         } else {
-          localStorage.removeItem("isAdmin");
-          isAdmin.value = false;
+          localStorage.removeItem('isAdmin')
+          isAdmin.value = false
         }
-      });
-    });
-
-    // No longer need to call provide("isAdmin", isAdmin) here since it's provided in App.vue
+      })
+    })
 
     return {
+      t,
+      locale,
       isAdmin,
       loginEmail,
       loginPassword,
       showLoginModal,
-      errorMessage,
       showError,
+      errorMessage,
+      toggleLanguage,
       openLoginModal,
       closeLoginModal,
       confirmLogin,
-      handleLogout,
-    };
-  },
-};
+      handleLogout
+    }
+  }
+}
 </script>
+
 
 <style scoped>
 /* Navbar Container */
@@ -350,4 +380,22 @@ export default {
   background: #42b883;
   color: #fff;
 }
+
+.lang-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin-left: 20px;
+}
+
+.lang-toggle:hover {
+  background: #42b883;
+}
+
+
 </style>

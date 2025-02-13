@@ -1,10 +1,10 @@
 <template>
   <div class="message-board">
-    <h1 class="title">Message Board</h1>
+    <h1 class="title">{{ $t("messageBoard") }}</h1>
     
     <form @submit.prevent="submitMessage" class="message-form">
-      <input v-model="newMessage" placeholder="Write your message..." required />
-      <button type="submit">Post</button>
+      <input v-model="newMessage" :placeholder="$t('writeMessage')" required />
+      <button type="submit">{{ $t("post") }}</button>
     </form>
 
     <div class="message-container">
@@ -15,9 +15,14 @@
           <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
           
           <!-- Admin Delete Button -->
-          <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">Delete</button>
+          <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">
+            {{ $t("delete") }}
+          </button>
         </p>
         <p class="message-text">{{ message.text }}</p>
+        <p v-if="!message.approved && message.userId === currentUserId" class="pending-label">
+          {{ $t("pendingApproval") }}
+        </p>
       </div>
     </div>
   </div>
@@ -27,20 +32,25 @@
 import { db } from "../firebase";
 import { collection, addDoc, deleteDoc, doc, orderBy, query, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { useI18n } from "vue-i18n";
 
 export default {
   name: "MessageBoard",
+  setup() {
+    const { t } = useI18n(); // Access translations
+    return { t };
+  },
   data() {
     return {
       messages: [],
       newMessage: "",
       currentUserId: localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`,
-      currentUsername: "Anonymous",
+      currentUsername: this.$t("anonymous"),
       isAdmin: false,
     };
   },
   async mounted() {
-    localStorage.setItem("userId", this.currentUserId); // Store guest ID so it persists
+    localStorage.setItem("userId", this.currentUserId);
     this.checkUser();
     this.listenForMessages();
   },
@@ -52,9 +62,9 @@ export default {
           .map((doc) => ({ id: doc.id, ...doc.data() }))
           .filter(
             (message) => 
-              message.approved ||  // Approved messages visible to all
-              message.userId === this.currentUserId ||  // Users see their own pending messages
-              this.isAdmin  // Admin sees everything
+              message.approved || 
+              message.userId === this.currentUserId ||  
+              this.isAdmin  
           );
       });
     },
@@ -62,11 +72,11 @@ export default {
       if (!this.newMessage.trim()) return;
 
       await addDoc(collection(db, "messageBoard"), {
-        userId: this.currentUserId,  // Keeps track of who posted the message
-        username: this.currentUsername,  // Displays the user's name
+        userId: this.currentUserId,  
+        username: this.currentUsername,  
         text: this.newMessage,
         createdAt: new Date(),
-        approved: false,  // Message is pending until an admin approves it
+        approved: false,
       });
 
       this.newMessage = "";
@@ -76,21 +86,23 @@ export default {
     },
     formatDate(date) {
       if (!date) return "";
-      return new Date(date.seconds * 1000).toLocaleTimeString();
+      return new Date(date.seconds * 1000).toLocaleTimeString(undefined, { 
+        hour: "2-digit", 
+        minute: "2-digit" 
+      });
     },
     checkUser() {
       const auth = getAuth();
       auth.onAuthStateChanged(async (user) => {
         if (user) {
           this.currentUserId = user.uid;
-          this.currentUsername = user.displayName || user.email.split("@")[0]; // Use display name or email prefix
-          const idTokenResult = await user.getIdTokenResult();
+          this.currentUsername = user.displayName || user.email.split("@")[0];
           const adminEmails = ["jesse.bou@outlook.com", "am@am.com"];
           this.isAdmin = adminEmails.includes(user.email);
         } else {
           this.currentUserId = localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`;
           localStorage.setItem("userId", this.currentUserId);
-          this.currentUsername = "Anonymous";
+          this.currentUsername = this.$t("anonymous");
           this.isAdmin = false;
         }
       });
@@ -136,6 +148,13 @@ export default {
 .pending-message {
   opacity: 0.5;
   filter: grayscale(50%);
+}
+
+.pending-label {
+  font-size: 1.1rem;
+  color: #f39c12;
+  font-weight: bold;
+  margin-top: 4px;
 }
 
 .message-meta {

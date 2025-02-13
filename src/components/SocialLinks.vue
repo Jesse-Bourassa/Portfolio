@@ -1,29 +1,38 @@
-<script>
-import 'primeicons/primeicons.css'
-</script>
-
 <template>
   <div class="social-links">
     <div class="icon-link">
       <a href="https://www.linkedin.com/in/jesse-bourassa-73b059292/" target="_blank">
         <i class="pi pi-linkedin"></i>
       </a>
-      <p>LinkedIn</p>
+      <p>{{ $t("linkedin") }}</p>
     </div>
     <div class="icon-link">
       <a href="https://github.com/Jesse-Bourassa" target="_blank">
         <i class="pi pi-github"></i>
       </a>
-      <p>GitHub</p>
+      <p>{{ $t("github") }}</p>
     </div>
     <div class="icon-link">
       <a href="mailto:jesse.bou@outlook.com">
         <i class="pi pi-envelope"></i>
       </a>
-      <p>Email</p>
+      <p>{{ $t("email") }}</p>
     </div>
   </div>
 </template>
+
+<script>
+import "primeicons/primeicons.css";
+import { useI18n } from "vue-i18n";
+
+export default {
+  name: "SocialLinks",
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  },
+};
+</script>
 
 <style scoped>
 .social-links {
@@ -40,7 +49,7 @@ import 'primeicons/primeicons.css'
 
 .icon-link i {
   font-size: 3rem;
-  color: #42b883; 
+  color: #42b883;
   transition: color 0.3s ease, transform 0.3s ease;
 }
 

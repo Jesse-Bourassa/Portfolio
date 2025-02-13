@@ -1,10 +1,8 @@
 <template>
 <div class="profile-section" :class="{ 'edit-mode': editMode }">    <!-- Edit Button (Only for Admins) -->
-    <button v-if="isAdmin" @click="editMode = !editMode" class="edit-button">
-      <i class="pi pi-pencil"></i>
-    </button>
+    
 
-    <p v-if="editMode" class="editing-label">Editing Mode</p>
+    <p v-if="editMode" class="editing-label">{{ $t('editingMode') }}</p>
 
 
     <!-- Profile Picture -->
@@ -18,7 +16,7 @@
     <h1 v-if="!editMode">{{ profileName }}</h1>
     <input v-else v-model="profileName" class="edit-input name-input" />
 
-    <p v-if="!editMode" class="tagline">{{ profileTagline }}</p>
+    <p v-if="!editMode" class="tagline">{{ $t('profileTagline') }}</p>
     <input v-else v-model="profileTagline" class="edit-input tagline-input" />
 
     <SocialLinks />
@@ -26,15 +24,15 @@
     <!-- CV Buttons -->
     <div class="cv-buttons">
       <a href="/src/assets/Jesse_Bourassa_Resume(English).pdf" download class="cv-button">
-        <i class="pi pi-download"></i> English CV
+        <i class="pi pi-download"></i> {{ $t('downloadEnglishCV') }}
       </a>
       <a href="/src/assets/Jesse_Bourassa_Resume(French).pdf" download class="cv-button">
-        <i class="pi pi-download"></i> French CV
+        <i class="pi pi-download"></i> {{ $t('downloadFrenchCV') }}
       </a>
     </div>
 
     <!-- Save Button -->
-    <button v-if="editMode" @click="saveChanges" class="save-button">Save</button>
+    <button v-if="editMode" @click="saveChanges" class="save-button">{{ $t('save') }}</button>
   </div>
 </template>
 
@@ -49,6 +47,9 @@ export default {
   name: "ProfileCard",
   components: { SocialLinks },
   setup() {
+    
+
+    
     // Inject the reactive admin state
     const isAdmin = inject("isAdmin", ref(false));
 
@@ -126,7 +127,14 @@ export default {
       uploadImage,
     };
   },
+  methods: {
+  changeLanguage(lang) {
+    this.$i18n.locale = lang;
+    localStorage.setItem("lang", lang);
+  }
+}
 };
+
 </script>
 
 <style scoped>

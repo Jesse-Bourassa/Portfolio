@@ -1,8 +1,8 @@
 <template>
   <div class="dashboard">
-    <h1 class="title">Admin Dashboard</h1>
+    <h1 class="title">{{ $t("adminDashboard") }}</h1>
     <div class="pending-messages">
-      <h2>Pending Messages</h2>
+      <h2>{{ $t("pendingMessages") }}</h2>
       <div v-if="pendingMessages.length" class="messages-container">
         <div v-for="message in pendingMessages" :key="message.id" class="message-item">
           <p class="message-meta">
@@ -11,12 +11,12 @@
           </p>
           <p class="message-text">{{ message.text }}</p>
           <div class="button-group">
-            <button @click="approveMessage(message.id)" class="approve-btn">Approve</button>
-            <button @click="deleteMessage(message.id)" class="delete-btn">Delete</button>
+            <button @click="approveMessage(message.id)" class="approve-btn">{{ $t("approve") }}</button>
+            <button @click="deleteMessage(message.id)" class="delete-btn">{{ $t("delete") }}</button>
           </div>
         </div>
       </div>
-      <p v-else class="no-messages">No pending messages</p>
+      <p v-else class="no-messages">{{ $t("noMessages") }}</p>
     </div>
   </div>
 </template>
@@ -24,6 +24,7 @@
 <script>
 import { db } from "../firebase";
 import { collection, updateDoc, deleteDoc, doc, query, where, onSnapshot } from "firebase/firestore";
+import { useI18n } from "vue-i18n";
 
 export default {
   name: "AdminDashboard",
@@ -31,6 +32,10 @@ export default {
     return {
       pendingMessages: []
     };
+  },
+  setup() {
+    const { t } = useI18n(); // Use translation
+    return { t };
   },
   async mounted() {
     this.fetchPendingMessages();

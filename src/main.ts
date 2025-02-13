@@ -6,6 +6,8 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import AnimateOnScroll from 'primevue/animateonscroll';
  import Particles from 'vue3-particles'
+ import i18n from './i18n'; // Import i18n
+
  
 const app = createApp(App);
 app.use(router);
@@ -15,5 +17,6 @@ app.use(PrimeVue, {
     },
   });
   app.use(Particles)
+  app.use(i18n);
   app.directive('animateonscroll', AnimateOnScroll);
 app.mount('#app');

@@ -1,5 +1,6 @@
 <template>
   <div class="project-card">
+    <!-- Admin Buttons -->
     <button v-if="isAdmin" @click="editProject" class="edit-button">
       <i class="pi pi-pencil"></i>
     </button>
@@ -7,52 +8,67 @@
       <i class="pi pi-trash"></i>
     </button>
 
+    <!-- Project Details -->
     <h3 class="project-title">{{ title }}</h3>
     <p class="project-description">{{ description }}</p>
-    <div class="tech-stack">
+
+    <!-- Tech Stack -->
+    <div v-if="technologies.length" class="tech-stack">
       <span v-for="tech in technologies" :key="tech" class="tech-badge">
         {{ tech }}
       </span>
     </div>
+
+    <!-- Project Links -->
     <div class="project-links">
-      <a :href="liveLink" target="_blank" class="icon-link" v-if="liveLink">
+      <a :href="liveLink" target="_blank" rel="noopener noreferrer" class="icon-link" v-if="liveLink">
         <i class="pi pi-play"></i>
-        <p>Live Demo</p>
+        <p>{{ $t("liveDemo") }}</p>
       </a>
-      <a :href="repoLink" target="_blank" class="icon-link" v-if="repoLink">
+      <a :href="repoLink" target="_blank" rel="noopener noreferrer" class="icon-link" v-if="repoLink">
         <i class="pi pi-github"></i>
-        <p>GitHub</p>
+        <p>{{ $t("github") }}</p>
       </a>
     </div>
   </div>
 </template>
 
 <script>
-import { inject } from "vue";
+import { inject, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
 export default {
   name: "ProjectCard",
-  // Instead of receiving isAdmin as a prop, inject it:
-  inject: ["isAdmin"],
   props: {
     title: { type: String, required: true },
     description: { type: String, required: true },
-    technologies: { type: Array, required: true },
+    technologies: { type: Array, default: () => [] }, // ✅ Ensures it's always an array
     liveLink: { type: String, required: false },
     repoLink: { type: String, required: false }
   },
-  methods: {
-    editProject() {
-      this.$emit("edit-project");
-    },
-    deleteProject() {
-      this.$emit("delete-project");
-    }
+  setup(props, { emit }) {
+    const { t } = useI18n();
+    const isAdmin = inject("isAdmin", false);
+
+    const editProject = () => {
+      emit("edit-project");
+    };
+
+    const deleteProject = () => {
+      emit("delete-project");
+    };
+
+    return {
+      isAdmin,
+      editProject,
+      deleteProject,
+      t
+    };
   }
 };
 </script>
 
 <style scoped>
-
 .project-card {
   position: relative;
   display: flex;
@@ -65,7 +81,7 @@ export default {
   min-height: 100%;
   text-align: center;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  gap: 0rem; /* Ensures spacing */
+  gap: 0rem;
   max-width: 1200px;
 }
 
@@ -153,8 +169,8 @@ export default {
 
 .delete-button {
   position: absolute;
-  top: -15px; /* Moves delete button below edit button */
-  left: 35px; /* Align with the edit button */
+  top: -15px;
+  left: 35px;
   background: #e74c3c;
   color: white;
   border: none;

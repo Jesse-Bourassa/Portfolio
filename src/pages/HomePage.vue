@@ -27,35 +27,30 @@
     v-animateonscroll="{ enterClass: 'animate-fadein'}"
     class="card-wrapper" >
       <div class="projects-section">
-        <h2>Projects</h2>
+        <h2>{{ $t("projects") }}</h2>
         <!-- "Add Project" Button -->
         <button
   v-if="isAdmin" 
   class="add-project-button" 
   @click="openAddProjectForm"
 >
-  Add Project
+{{ $t("addProject") }}
 </button>
 
         <!-- Add / Edit Project Form -->
         <div v-if="showAddForm" class="project-form">
-          <h3>{{ editing ? "Edit Project" : "Add New Project" }}</h3>
+          <h3>{{ editing ? $t("editProject") : $t("addNewProject") }}</h3>
           <form @submit.prevent="submitProject">
-            <input v-model="form.title" placeholder="Project Title" required />
-            <textarea
-              v-model="form.description"
-              placeholder="Description"
-              required
-            ></textarea>
-            <input
-              v-model="form.technologies"
-              placeholder="Technologies (comma separated)"
-            />
-            <input v-model="form.repoLink" placeholder="GitHub Link (optional)" />
-            <input v-model="form.liveLink" placeholder="Demo Link (optional)" />
+            <input v-model="form.title" :placeholder="$t('projectTitle')" required />
+            <textarea v-model="form.description" :placeholder="$t('description')" required></textarea>
+
+            <input v-model="form.technologies" :placeholder="$t('technologies')" />
+
+            <input v-model="form.repoLink" :placeholder="$t('githubLink')" />
+            <input v-model="form.liveLink" :placeholder="$t('demoLink')" />
             <div class="form-buttons">
-              <button type="submit">{{ editing ? "Update" : "Add" }} Project</button>
-              <button type="button" @click="cancelAddProject">Cancel</button>
+              <button type="submit">{{ editing ? $t("updateProject") : $t("addProject") }}</button>
+              <button type="button" @click="cancelAddProject">{{ $t("cancel") }}</button>
             </div>
           </form>
         </div>
@@ -94,7 +89,7 @@
       class="card-wrapper"
     >
       <div class="experience-section">
-        <h2>Experience</h2>
+        <h2>{{ $t("experienceTitle") }}</h2>
         <Experience404 />
       </div>
     </div>
