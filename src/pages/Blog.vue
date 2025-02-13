@@ -9,11 +9,10 @@
 
     <div class="message-container">
       <div v-for="message in messages" :key="message.id" 
-           :class="{'message-item': true, 'pending-message': !message.approved && message.username === username}">
+           :class="{'message-item': true, 'pending-message': !message.approved && message.userId === currentUserId}">
         <p class="message-meta">
           <strong class="username">{{ message.username }}</strong>
           <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
-          <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">Delete</button>
         </p>
         <p class="message-text">{{ message.text }}</p>
       </div>
@@ -23,7 +22,7 @@
 
 <script>
 import { db } from "../firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc, orderBy, query, where, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, orderBy, query, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 export default {
@@ -32,51 +31,65 @@ export default {
     return {
       messages: [],
       newMessage: "",
-      username: localStorage.getItem("username") || "Anonymous",
+      currentUserId: localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`,
+      currentUsername: "Anonymous",
       isAdmin: false,
     };
   },
   async mounted() {
+    localStorage.setItem("userId", this.currentUserId); // Store guest ID so it persists
+    this.checkUser();
     this.listenForMessages();
-    this.checkAdminStatus();
   },
   methods: {
     listenForMessages() {
       const q = query(collection(db, "messageBoard"), orderBy("createdAt", "desc"));
       onSnapshot(q, (snapshot) => {
-        this.messages = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        this.messages = snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter(
+            (message) => 
+              message.approved ||  // Approved messages visible to all
+              message.userId === this.currentUserId ||  // Users see their own pending messages
+              this.isAdmin  // Admin sees everything
+          );
       });
     },
     async submitMessage() {
       if (!this.newMessage.trim()) return;
+
       await addDoc(collection(db, "messageBoard"), {
-        username: this.username,
+        userId: this.currentUserId,  // Keeps track of who posted the message
+        username: this.currentUsername,  // Displays the user's name
         text: this.newMessage,
         createdAt: new Date(),
-        approved: false,
+        approved: false,  // Message is pending until an admin approves it
       });
+
       this.newMessage = "";
-    },
-    async deleteMessage(messageId) {
-      await deleteDoc(doc(db, "messageBoard", messageId));
     },
     formatDate(date) {
       if (!date) return "";
       return new Date(date.seconds * 1000).toLocaleTimeString();
     },
-    checkAdminStatus() {
+    checkUser() {
       const auth = getAuth();
       auth.onAuthStateChanged(async (user) => {
         if (user) {
+          this.currentUserId = user.uid;
+          this.currentUsername = user.displayName || user.email.split("@")[0]; // Use display name or email prefix
           const idTokenResult = await user.getIdTokenResult();
           const adminEmails = ["jesse.bou@outlook.com", "am@am.com"];
-          this.isAdmin = adminEmails.includes(idTokenResult.claims.email);
+          this.isAdmin = adminEmails.includes(user.email);
         } else {
+          this.currentUserId = localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`;
+          localStorage.setItem("userId", this.currentUserId);
+          this.currentUsername = "Anonymous";
           this.isAdmin = false;
         }
       });
     }
-  },
+  }
 };
 </script>
 
@@ -142,23 +155,5 @@ export default {
   font-size: 1.6rem;
   color: #fff;
   margin: 8px 0 0 0;
-}
-
-.delete-btn {
-  background: red;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-button {
-  background: #42b883;
-  color: white;
-  border: none;
-  padding: 12px 18px;
-  font-size: 1.2rem;
-  cursor: pointer;
 }
 </style>
