@@ -1,51 +1,21 @@
 <template>
   <div class="message-board">
-    <h1>Message Board</h1>
-
-    <!-- Set Username -->
-    <div class="username-container">
-      <input v-model="username" placeholder="Enter your name..." />
-      <button @click="saveUsername">Save</button>
-    </div>
-
-    <!-- Sort Options -->
-    <div class="sort-options">
-      <button @click="sortMessages('best')">Best</button>
-      <button @click="sortMessages('new')">New</button>
-      <button @click="sortMessages('top')">Top</button>
-    </div>
-
-    <!-- New Message Form -->
+    <h1 class="title">Message Board</h1>
+    
     <form @submit.prevent="submitMessage" class="message-form">
       <input v-model="newMessage" placeholder="Write your message..." required />
       <button type="submit">Post</button>
     </form>
 
-    <!-- Messages List -->
-    <div v-for="message in sortedMessages" :key="message.id" class="message-card">
-      <div class="message-header">
-        <p><strong>{{ message.username }}</strong> <span class="timestamp">({{ formatDate(message.createdAt) }})</span></p>
-      </div>
-      <p class="message-content">{{ message.text }}</p>
-
-      <!-- Voting -->
-      <div class="message-actions">
-        <button @click="voteMessage(message.id, 1)">⬆ {{ message.upvotes }}</button>
-        <button @click="voteMessage(message.id, -1)">⬇ {{ message.downvotes }}</button>
-        <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">🗑 Delete</button>
-      </div>
-
-      <!-- Replies Section -->
-      <div class="replies">
-        <div v-for="reply in message.replies" :key="reply.id" class="reply">
-          <p><strong>{{ reply.username }}</strong>: {{ reply.text }}</p>
-        </div>
-
-        <!-- Reply Form -->
-        <form @submit.prevent="submitReply(message.id)">
-          <input v-model="newReplies[message.id]" placeholder="Write a reply..." />
-          <button type="submit">Reply</button>
-        </form>
+    <div class="message-container">
+      <div v-for="message in messages" :key="message.id" 
+           :class="{'message-item': true, 'pending-message': !message.approved && message.username === username}">
+        <p class="message-meta">
+          <strong class="username">{{ message.username }}</strong>
+          <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
+          <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">Delete</button>
+        </p>
+        <p class="message-text">{{ message.text }}</p>
       </div>
     </div>
   </div>
@@ -53,7 +23,8 @@
 
 <script>
 import { db } from "../firebase";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, orderBy, query, where, onSnapshot } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 export default {
   name: "MessageBoard",
@@ -61,89 +32,50 @@ export default {
     return {
       messages: [],
       newMessage: "",
-      newReplies: {},
       username: localStorage.getItem("username") || "Anonymous",
-      isAdmin: false, // Set dynamically if using authentication
-      sortType: "best",
+      isAdmin: false,
     };
   },
-  computed: {
-    sortedMessages() {
-      if (this.sortType === "new") {
-        return [...this.messages].sort((a, b) => b.createdAt - a.createdAt);
-      } else if (this.sortType === "top") {
-        return [...this.messages].sort((a, b) => b.upvotes - a.upvotes);
-      } else {
-        return [...this.messages].sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
-      }
-    },
-  },
   async mounted() {
-    await this.fetchMessages();
+    this.listenForMessages();
+    this.checkAdminStatus();
   },
   methods: {
-    async fetchMessages() {
-      const querySnapshot = await getDocs(query(collection(db, "messageBoard"), orderBy("createdAt", "desc")));
-      this.messages = await Promise.all(
-        querySnapshot.docs.map(async (docSnap) => {
-          const messageData = { id: docSnap.id, ...docSnap.data(), replies: [] };
-          const repliesSnapshot = await getDocs(collection(docSnap.ref, "replies"));
-          messageData.replies = repliesSnapshot.docs.map((replyDoc) => ({ id: replyDoc.id, ...replyDoc.data() }));
-          return messageData;
-        })
-      );
+    listenForMessages() {
+      const q = query(collection(db, "messageBoard"), orderBy("createdAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        this.messages = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      });
     },
     async submitMessage() {
       if (!this.newMessage.trim()) return;
       await addDoc(collection(db, "messageBoard"), {
         username: this.username,
         text: this.newMessage,
-        upvotes: 1,
-        downvotes: 0,
         createdAt: new Date(),
+        approved: false,
       });
       this.newMessage = "";
-      await this.fetchMessages();
-    },
-    async voteMessage(messageId, value) {
-      const messageRef = doc(db, "messageBoard", messageId);
-      const message = this.messages.find((msg) => msg.id === messageId);
-
-      if (value === 1) {
-        await updateDoc(messageRef, { upvotes: message.upvotes + 1 });
-      } else {
-        await updateDoc(messageRef, { downvotes: message.downvotes + 1 });
-      }
-
-      await this.fetchMessages();
     },
     async deleteMessage(messageId) {
-      if (!this.isAdmin) return;
       await deleteDoc(doc(db, "messageBoard", messageId));
-      await this.fetchMessages();
-    },
-    async submitReply(messageId) {
-      if (!this.newReplies[messageId]?.trim()) return;
-      await addDoc(collection(db, "messageBoard", messageId, "replies"), {
-        username: this.username,
-        text: this.newReplies[messageId],
-        createdAt: new Date(),
-      });
-      this.newReplies[messageId] = "";
-      await this.fetchMessages();
     },
     formatDate(date) {
       if (!date) return "";
-      const d = date.toDate();
-      return d.toLocaleString();
+      return new Date(date.seconds * 1000).toLocaleTimeString();
     },
-    saveUsername() {
-      localStorage.setItem("username", this.username);
-      alert("Username saved!");
-    },
-    sortMessages(type) {
-      this.sortType = type;
-    },
+    checkAdminStatus() {
+      const auth = getAuth();
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          const idTokenResult = await user.getIdTokenResult();
+          const adminEmails = ["jesse.bou@outlook.com", "am@am.com"];
+          this.isAdmin = adminEmails.includes(idTokenResult.claims.email);
+        } else {
+          this.isAdmin = false;
+        }
+      });
+    }
   },
 };
 </script>
@@ -152,81 +84,81 @@ export default {
 .message-board {
   text-align: center;
   padding: 2rem;
-}
-
-.username-container {
-  margin-bottom: 1rem;
+  width: 100%;
+  height: 100vh;
   display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.username-container input {
-  padding: 8px;
-  font-size: 1rem;
-  width: 200px;
-}
-
-.sort-options {
-  margin-bottom: 1rem;
-}
-
-.sort-options button {
-  margin-right: 5px;
-}
-
-.message-form {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
 }
 
 .message-form input {
   padding: 10px;
   font-size: 1rem;
-  width: 400px;
+  width: 600px;
 }
 
-.message-card {
+.message-container {
   background: rgba(40, 40, 40, 0.9);
   padding: 1rem;
   border-radius: 8px;
-  margin-bottom: 1rem;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  margin-top: 1rem;
+  width: 200%;
+  height: 72%;
+  overflow-y: auto;
+  text-align: left;
 }
 
-.message-header {
+.message-item {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 1.2rem;
+}
+
+.pending-message {
+  opacity: 0.5;
+  filter: grayscale(50%);
+}
+
+.message-meta {
+  font-size: 1.4rem;
+  color: #ccc;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
-.message-content {
-  font-size: 1.1rem;
-  margin: 10px 0;
+.username {
+  font-weight: bold;
+  font-size: 1.5rem;
 }
 
-.message-actions {
-  display: flex;
-  justify-content: flex-start;
-  gap: 10px;
+.timestamp {
+  font-size: 1.3rem;
+  color: #aaa;
 }
 
-.replies {
-  margin-top: 1rem;
-  padding-left: 1rem;
-  border-left: 2px solid #42b883;
+.message-text {
+  font-size: 1.6rem;
+  color: #fff;
+  margin: 8px 0 0 0;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
 button {
   background: #42b883;
   color: white;
   border: none;
-  padding: 8px 12px;
+  padding: 12px 18px;
+  font-size: 1.2rem;
   cursor: pointer;
-}
-
-button:hover {
-  background: #36a573;
 }
 </style>
