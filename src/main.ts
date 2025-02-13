@@ -6,7 +6,7 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import AnimateOnScroll from 'primevue/animateonscroll';
  import Particles from 'vue3-particles'
- import i18n from './i18n'; // Import i18n
+ import i18n from './i18n'; // Importing the updated i18n.ts
 
  
 const app = createApp(App);
