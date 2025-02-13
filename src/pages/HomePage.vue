@@ -8,7 +8,7 @@
       <ProfileCard />
     </div>
 
-    <!-- Spacer to allow scrolling -->
+    <!-- Spacer -->
     <div class="spacer"></div>
 
     <!-- About Card with fade-in effect -->
@@ -19,45 +19,75 @@
       <AboutCard />
     </div>
 
-    <!-- Spacer to allow scrolling -->
+    <!-- Spacer -->
     <div class="spacer"></div>
 
     <!-- Projects Section -->
-    <div
-      v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
-      class="card-wrapper"
-    >
+    <div 
+    v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
+    class="card-wrapper" >
       <div class="projects-section">
         <h2>Projects</h2>
+        <!-- "Add Project" Button -->
+        <button class="add-project-button" @click="openAddProjectForm">
+          Add Project
+        </button>
+
+        <!-- Add / Edit Project Form -->
+        <div v-if="showAddForm" class="project-form">
+          <h3>{{ editing ? "Edit Project" : "Add New Project" }}</h3>
+          <form @submit.prevent="submitProject">
+            <input v-model="form.title" placeholder="Project Title" required />
+            <textarea
+              v-model="form.description"
+              placeholder="Description"
+              required
+            ></textarea>
+            <input
+              v-model="form.technologies"
+              placeholder="Technologies (comma separated)"
+            />
+            <input v-model="form.repoLink" placeholder="GitHub Link (optional)" />
+            <input v-model="form.liveLink" placeholder="Demo Link (optional)" />
+            <div class="form-buttons">
+              <button type="submit">{{ editing ? "Update" : "Add" }} Project</button>
+              <button type="button" @click="cancelAddProject">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Projects List -->
         <div class="project-cards">
-          <ProjectCard
-            title="High-End Detailling"
-            description="A comprehensive platform for showcasing and managing high-end auto detailing services, including appointment scheduling, service catalog, and customer reviews."
-            :technologies="['SpringBoot', 'MYSQL', 'TypeScript','React','JWT Authentication']"
-            liveLink="https://highend-1.onrender.com"
-            repoLink="https://github.com/ZacharyLelievre/HighEnd"
-          />
-          <ProjectCard
-            title="Omegal Remake"
-            description="A remake of Omegle built to connect users through real-time text and video chat using WebRTC and WebSockets. This project helped me learn how to host applications and implement WebSocket communication for seamless, scalable interactions."
-            :technologies="['HTML', 'CSS', 'JavaScript', 'WebRTC', 'WebSockets', 'Node.js', 'Express']"
-            repoLink="https://github.com/Jesse-Bourassa/OmegalRemake"
-          />
-          <ProjectCard
-            title="Pet Clinic"
-            description="Developed and tested RESTful APIs for the Customer Service module in Pet Clinic using Spring Boot and MySQL. Implemented account management features, integrated Spring Data JPA, and ensured reliability through JUnit and Mockito testing."
-            :technologies="['Spring Boot', 'MySQL', 'Spring Data JPA', 'JUnit', 'Mockito', 'Postman']"
-            repoLink="https://github.com/cgerard321/champlain_petclinic"
-          />
+          <div
+            class="project-item"
+            v-for="project in projects"
+            :key="project.id"
+          >
+         
+            
+
+            <ProjectCard
+              :title="project.title"
+              :description="project.description"
+              :technologies="project.technologies"
+              :repoLink="project.repoLink"
+              :liveLink="project.liveLink"
+              :isAdmin="isAdmin"
+              @edit-project="editProject(project)"
+              @delete-project="deleteProject(project.id)"
+            />
+          </div>
         </div>
       </div>
-      </div>
-    <!-- Experience Section -->
+    </div>
+
+    <!-- Spacer -->
     <div class="spacer"></div>
 
+    <!-- Experience Section -->
     <div
-        v-animateonscroll="{ enterClass: 'animate-fadeleft', leaveClass: 'animate-fadeoutleft' }"
-        class="card-wrapper"
+      v-animateonscroll="{ enterClass: 'animate-fadeleft', leaveClass: 'animate-fadeoutleft' }"
+      class="card-wrapper"
     >
       <div class="experience-section">
         <h2>Experience</h2>
@@ -71,8 +101,17 @@
 import ProfileCard from "/src/components/ProfileCard.vue";
 import AboutCard from "/src/components/AboutCard.vue";
 import ProjectCard from "/src/components/ProjectCard.vue";
-import Experience404 from "/src/components/Experience.vue"
+import Experience404 from "/src/components/Experience.vue";
 import Spacer from "../components/Spacer.vue";
+import { db } from "../firebase";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 export default {
   name: "HomePage",
@@ -83,57 +122,258 @@ export default {
     ProjectCard,
     Experience404,
   },
+  data() {
+    return {
+      isAdmin: true, // Set to true to see admin buttons (adjust as needed)
+      showAddForm: false,
+      editing: false,
+      projects: [],
+      form: {
+        id: "",
+        title: "",
+        description: "",
+        technologies: "",
+        repoLink: "",
+        liveLink: "",
+      },
+    };
+  },
+  mounted() {
+    this.fetchProjects();
+  },
+  methods: {
+    async fetchProjects() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        this.projects = querySnapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        }));
+      } catch (error) {
+        console.error("Error fetching projects from DB:", error);
+      }
+    },
+    openAddProjectForm() {
+      this.showAddForm = true;
+      if (!this.editing) {
+        this.clearForm();
+      }
+    },
+    async submitProject() {
+      const projectData = {
+        title: this.form.title,
+        description: this.form.description,
+        technologies: this.form.technologies
+          .split(",")
+          .map((tech) => tech.trim())
+          .filter((tech) => tech.length),
+        repoLink: this.form.repoLink,
+        liveLink: this.form.liveLink,
+      };
+
+      try {
+        if (this.editing && this.form.id) {
+          const projectRef = doc(db, "projects", this.form.id);
+          await updateDoc(projectRef, projectData);
+          const index = this.projects.findIndex(
+            (project) => project.id === this.form.id
+          );
+          if (index !== -1) {
+            this.projects.splice(index, 1, { id: this.form.id, ...projectData });
+          }
+        } else {
+          const docRef = await addDoc(collection(db, "projects"), projectData);
+          projectData.id = docRef.id;
+          this.projects.push(projectData);
+        }
+        this.clearForm();
+        this.showAddForm = false;
+        this.editing = false;
+      } catch (error) {
+        console.error("Error saving project to DB:", error);
+      }
+    },
+    editProject(project) {
+      this.form.id = project.id;
+      this.form.title = project.title;
+      this.form.description = project.description;
+      this.form.technologies = project.technologies.join(", ");
+      this.form.repoLink = project.repoLink;
+      this.form.liveLink = project.liveLink;
+      this.editing = true;
+      this.showAddForm = true;
+    },
+    async deleteProject(id) {
+      try {
+        await deleteDoc(doc(db, "projects", id));
+        this.projects = this.projects.filter((project) => project.id !== id);
+      } catch (error) {
+        console.error("Error deleting project from DB:", error);
+      }
+    },
+    cancelAddProject() {
+      this.clearForm();
+      this.showAddForm = false;
+      this.editing = false;
+    },
+    clearForm() {
+      this.form = {
+        id: "",
+        title: "",
+        description: "",
+        technologies: "",
+        repoLink: "",
+        liveLink: "",
+      };
+    },
+  },
 };
 </script>
 
 <style scoped>
-/* Home container with padding */
 .home-container {
   position: relative;
   padding: 2rem;
 }
 
-/* Card wrapper styling */
 .card-wrapper {
   margin: 2rem;
   transition: all 0.8s ease-in-out;
 }
 
-/* Spacer to ensure scrollable content */
 .spacer {
-  height: 20vh; /* Adjust height to ensure enough scrolling space */
+  height: 20vh;
 }
 
-/* Projects Section */
 .projects-section {
   text-align: center;
+
+  padding: 10px;
+}
+
+.projects-section h2 {
+  font-size: 3rem; 
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 5rem;
+}
+
+.add-project-button {
+  padding: 1rem 2rem; 
+  font-size: 1.2rem;
+  margin-bottom: 5rem;
+  font-weight: bold;
+  background-color: #42b883;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.add-project-button:hover {
+  background-color: #36a573;
+}
+
+.project-form {
+  background-color: #1f1f1f;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.project-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.project-form input,
+.project-form textarea {
+  padding: 0.8rem;
+  border-radius: 5px;
+  border: none;
+}
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+.project-form button {
+  width: 150px;
+  padding: 0.8rem;
+  border: none;
+  background-color: #42b883;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.project-form button:hover {
+  background-color: #36a573;
 }
 
 .project-cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 4rem;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 2rem;
+  align-items: stretch;
 }
-.project-card {
-  flex: 1 1 500px;
-  max-width: 600px;
-  min-width: 300px;
-  box-sizing: border-box;
-}
-/* Hide scrollbar for all browsers */
-body {
-  overflow-y: scroll; /* Keeps content scrollable */
+.project-item {
+  position: relative;
 }
 
-body::-webkit-scrollbar {
-  width: 0; /* Removes scrollbar width */
-  height: 0; /* Removes horizontal scrollbar (if needed) */
+/* Inline admin button styles (if you keep them) */
+.edit-button {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  background-color: #42b883;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  z-index: 10;
 }
 
-body {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+.edit-button i {
+  color: white;
+  font-size: 1.2rem;
 }
 
+.edit-button:hover {
+  background-color: #36a573;
+  transform: scale(1.1);
+}
+
+.delete-button {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  
+}
+
+.delete-button i {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.delete-button:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
 </style>

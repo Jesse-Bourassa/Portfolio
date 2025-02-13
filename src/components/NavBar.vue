@@ -16,7 +16,7 @@
       </li>
 
       <!-- Dashboard link visible only when logged in -->
-      <li v-if="isLoggedIn">
+      <li v-if="isAdmin">
         <router-link to="/Dashboard">
           <i class="pi pi-cog"></i>
           <span>Dashboard</span>
@@ -24,41 +24,44 @@
       </li>
     </ul>
 
-    <!-- Authentication Circle on the Right -->
-    <div class="auth-circle" @click="isLoggedIn ? handleLogout() : openLoginModal()">
-      <i class="pi" :class="isLoggedIn ? 'pi-lock-open' : 'pi-user'"></i>
+    <!-- Authentication Circle -->
+    <div class="auth-circle" @click="isAdmin ? handleLogout() : openLoginModal()">
+      <i class="pi" :class="isAdmin ? 'pi-lock-open' : 'pi-user'"></i>
     </div>
+
     <!-- Login Modal -->
     <div v-if="showLoginModal" class="custom-modal-overlay">
       <div class="custom-modal">
         <h2>Admin Login</h2>
-        <input type="text" v-model="loginEmail" placeholder="Enter admin email" />
+        <input type="email" v-model="loginEmail" placeholder="Enter admin email" />
         <input type="password" v-model="loginPassword" placeholder="Enter password" />
         <div class="modal-buttons">
           <button @click="closeLoginModal">Cancel</button>
           <button @click="confirmLogin">Login</button>
         </div>
         <div v-if="showError" class="error-toast">
-      {{ errorMessage }}
-    </div>
+          {{ errorMessage }}
+        </div>
       </div>
     </div>
   </nav>
 </template>
 
 <script>
-import { ref } from 'vue';
-import { auth } from '../firebase';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { inject, ref, onMounted } from "vue";
+import { auth } from "../firebase";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
 export default {
-  name: 'NavBar',
+  name: "NavBar",
   setup() {
-    const isLoggedIn = ref(false);
-    const loginEmail = ref('');
-    const loginPassword = ref('');
+    // Inject the isAdmin state provided from App.vue
+    const isAdmin = inject("isAdmin");
+
+    const loginEmail = ref("");
+    const loginPassword = ref("");
     const showLoginModal = ref(false);
-    const errorMessage = ref('');
+    const errorMessage = ref("");
     const showError = ref(false);
 
     const openLoginModal = () => {
@@ -67,21 +70,28 @@ export default {
 
     const closeLoginModal = () => {
       showLoginModal.value = false;
-      loginEmail.value = '';
-      loginPassword.value = '';
+      loginEmail.value = "";
+      loginPassword.value = "";
     };
 
     const confirmLogin = async () => {
       try {
-        if (!loginEmail.value || !loginPassword.value) {
-          throw new Error('Both email and password are required.');
-        }
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          loginEmail.value,
+          loginPassword.value
+        );
+        const user = userCredential.user;
 
-        await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-        isLoggedIn.value = true;
-        closeLoginModal();
+        if (user.email === "jesse.bou@outlook.com" || user.email === "am@am.com") {
+          localStorage.setItem("isAdmin", "true");
+          isAdmin.value = true; // This updates the reactive shared state
+          closeLoginModal();
+        } else {
+          throw new Error("Unauthorized user.");
+        }
       } catch (error) {
-        errorMessage.value = 'Login failed. Please try again.';
+        errorMessage.value = "Login failed. Please check your credentials.";
         showError.value = true;
         setTimeout(() => {
           showError.value = false;
@@ -91,16 +101,26 @@ export default {
 
     const handleLogout = async () => {
       await signOut(auth);
-      isLoggedIn.value = false;
-      alert('Logged out successfully.');
+      localStorage.removeItem("isAdmin");
+      isAdmin.value = false; // Update the shared state
     };
 
-    onAuthStateChanged(auth, (user) => {
-      isLoggedIn.value = !!user;
+    onMounted(() => {
+      onAuthStateChanged(auth, (user) => {
+        if (user && (user.email === "jesse.bou@outlook.com" || user.email === "am@am.com")) {
+          localStorage.setItem("isAdmin", "true");
+          isAdmin.value = true;
+        } else {
+          localStorage.removeItem("isAdmin");
+          isAdmin.value = false;
+        }
+      });
     });
 
+    // No longer need to call provide("isAdmin", isAdmin) here since it's provided in App.vue
+
     return {
-      isLoggedIn,
+      isAdmin,
       loginEmail,
       loginPassword,
       showLoginModal,
