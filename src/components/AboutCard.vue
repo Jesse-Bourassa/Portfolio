@@ -68,6 +68,8 @@ export default {
 
     // Toggle highlight when clicking on a word in display mode
     const handleHighlightClick = (event) => {
+      if (!isAdmin.value) return; // Only proceed if the user is an admin
+
       // Ensure a word span was clicked
       if (event.target.tagName === 'SPAN') {
         const clickedWord = event.target.innerText.trim();

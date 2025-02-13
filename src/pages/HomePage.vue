@@ -2,7 +2,7 @@
   <div class="home-container">
     <!-- Profile Card with fade-out effect -->
     <div
-      v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
+      v-animateonscroll="{ enterClass: 'animate-fadein'}"
       class="card-wrapper"
     >
       <ProfileCard />
@@ -13,7 +13,7 @@
 
     <!-- About Card with fade-in effect -->
     <div
-      v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
+      v-animateonscroll="{ enterClass: 'animate-fadein'}"
       class="card-wrapper"
     >
       <AboutCard />
@@ -24,14 +24,18 @@
 
     <!-- Projects Section -->
     <div 
-    v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
+    v-animateonscroll="{ enterClass: 'animate-fadein'}"
     class="card-wrapper" >
       <div class="projects-section">
         <h2>Projects</h2>
         <!-- "Add Project" Button -->
-        <button class="add-project-button" @click="openAddProjectForm">
-          Add Project
-        </button>
+        <button
+  v-if="isAdmin" 
+  class="add-project-button" 
+  @click="openAddProjectForm"
+>
+  Add Project
+</button>
 
         <!-- Add / Edit Project Form -->
         <div v-if="showAddForm" class="project-form">
@@ -103,6 +107,7 @@ import AboutCard from "/src/components/AboutCard.vue";
 import ProjectCard from "/src/components/ProjectCard.vue";
 import Experience404 from "/src/components/Experience.vue";
 import Spacer from "../components/Spacer.vue";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase";
 import {
   collection,
@@ -124,7 +129,7 @@ export default {
   },
   data() {
     return {
-      isAdmin: true, // Set to true to see admin buttons (adjust as needed)
+      isAdmin: false,
       showAddForm: false,
       editing: false,
       projects: [],
@@ -140,6 +145,15 @@ export default {
   },
   mounted() {
     this.fetchProjects();
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // Optionally, add more logic to check if the user is an admin.
+      this.isAdmin = true; // The user is logged in, so show the button.
+    } else {
+      this.isAdmin = false; // No user is logged in, hide the button.
+    }
+  });
   },
   methods: {
     async fetchProjects() {
@@ -193,6 +207,7 @@ export default {
         console.error("Error saving project to DB:", error);
       }
     },
+    
     editProject(project) {
       this.form.id = project.id;
       this.form.title = project.title;
