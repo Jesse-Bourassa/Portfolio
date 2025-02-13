@@ -1,24 +1,29 @@
 <template>
   <div class="dashboard">
-    <h1>Admin Dashboard</h1>
+    <h1 class="title">Admin Dashboard</h1>
     <div class="pending-messages">
       <h2>Pending Messages</h2>
-      <div v-for="message in pendingMessages" :key="message.id" class="message-item">
-        <p class="message-meta">
-          <strong class="username">{{ message.username }}</strong>
-          <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
-        </p>
-        <p class="message-text">{{ message.text }}</p>
-        <button @click="approveMessage(message.id)" class="approve-btn">Approve</button>
-        <button @click="deleteMessage(message.id)" class="delete-btn">Delete</button>
+      <div v-if="pendingMessages.length" class="messages-container">
+        <div v-for="message in pendingMessages" :key="message.id" class="message-item">
+          <p class="message-meta">
+            <strong class="username">{{ message.username }}</strong>
+            <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
+          </p>
+          <p class="message-text">{{ message.text }}</p>
+          <div class="button-group">
+            <button @click="approveMessage(message.id)" class="approve-btn">Approve</button>
+            <button @click="deleteMessage(message.id)" class="delete-btn">Delete</button>
+          </div>
+        </div>
       </div>
+      <p v-else class="no-messages">No pending messages</p>
     </div>
   </div>
 </template>
 
 <script>
 import { db } from "../firebase";
-import { collection, getDocs, updateDoc, deleteDoc, doc, query, where, onSnapshot } from "firebase/firestore";
+import { collection, updateDoc, deleteDoc, doc, query, where, onSnapshot } from "firebase/firestore";
 
 export default {
   name: "AdminDashboard",
@@ -54,57 +59,124 @@ export default {
 <style scoped>
 .dashboard {
   text-align: center;
-  padding: 2rem;
+  padding: 4rem 2rem;
   color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 1000px;
+  min-width: 100vh;
+  min-height: 100px;
+  background: rgba(0, 0, 0, 0.5);
 }
+
+.title {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 2.5rem;
+}
+
 .pending-messages {
-  margin-top: 2rem;
-  background: rgba(40, 40, 40, 0.9);
-  padding: 1rem;
-  border-radius: 8px;
-  width: 60%;
-  margin-left: auto;
-  margin-right: auto;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 15px;
+  width: 95%;
+  max-width: 1000px;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.messages-container {
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
 .message-item {
-  padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 1.2rem;
-}
-.message-meta {
+  padding: 1.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   font-size: 1.4rem;
-  color: #ccc;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  transition: 0.3s ease-in-out;
+}
+
+.message-meta {
+  font-size: 1.5rem;
+  color: #ddd;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .username {
   font-weight: bold;
-  font-size: 1.5rem;
-}
-.timestamp {
-  font-size: 1.3rem;
-  color: #aaa;
-}
-.message-text {
   font-size: 1.6rem;
   color: #fff;
-  margin: 8px 0 0 0;
 }
+
+.timestamp {
+  font-size: 1.2rem;
+  color: #bbb;
+}
+
+.message-text {
+  font-size: 1.8rem;
+  color: #fff;
+  margin: 15px 0;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.approve-btn, .delete-btn {
+  padding: 14px 28px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: bold;
+  transition: 0.3s ease-in-out;
+}
+
 .approve-btn {
-  background: green;
+  background: #28a745;
   color: white;
   border: none;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 1rem;
 }
+
+.approve-btn:hover {
+  background: #1e7d34;
+}
+
 .delete-btn {
-  background: red;
+  background: #dc3545;
   color: white;
   border: none;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 1rem;
+}
+
+.delete-btn:hover {
+  background: #b52b37;
+}
+
+.no-messages {
+  font-size: 1.6rem;
+  color: #ccc;
+  text-align: center;
+  margin-top: 1.5rem;
 }
 </style>

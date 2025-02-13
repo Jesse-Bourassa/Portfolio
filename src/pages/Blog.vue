@@ -13,6 +13,9 @@
         <p class="message-meta">
           <strong class="username">{{ message.username }}</strong>
           <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
+          
+          <!-- Admin Delete Button -->
+          <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">Delete</button>
         </p>
         <p class="message-text">{{ message.text }}</p>
       </div>
@@ -22,7 +25,7 @@
 
 <script>
 import { db } from "../firebase";
-import { collection, addDoc, orderBy, query, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, orderBy, query, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 export default {
@@ -67,6 +70,9 @@ export default {
       });
 
       this.newMessage = "";
+    },
+    async deleteMessage(messageId) {
+      await deleteDoc(doc(db, "messageBoard", messageId));
     },
     formatDate(date) {
       if (!date) return "";
@@ -155,5 +161,14 @@ export default {
   font-size: 1.6rem;
   color: #fff;
   margin: 8px 0 0 0;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 1rem;
 }
 </style>
