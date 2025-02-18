@@ -20,7 +20,7 @@
         <p class="message-meta">
           <strong class="username">{{ message.username }}</strong>
           <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
-          
+           
           <!-- Admin Delete Button -->
           <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">
             {{ $t("delete") }}

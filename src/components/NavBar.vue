@@ -2,7 +2,7 @@
   <nav class="navbar">
     <!-- Navigation Links (using vue-i18n keys) -->
     <a
-      href="mailto:your-email@example.com"
+      href="mailto:jesse.bou@outlook.com"
       class="contact-btn"
     >
       {{ t('contactMe') }}
