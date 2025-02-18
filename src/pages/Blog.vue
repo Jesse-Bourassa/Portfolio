@@ -1,15 +1,22 @@
 <template>
   <div class="message-board">
     <h1 class="title">{{ $t("messageBoard") }}</h1>
-    
+
     <form @submit.prevent="submitMessage" class="message-form">
       <input v-model="newMessage" :placeholder="$t('writeMessage')" required />
       <button type="submit">{{ $t("post") }}</button>
     </form>
 
     <div class="message-container">
-      <div v-for="message in messages" :key="message.id" 
-           :class="{'message-item': true, 'pending-message': !message.approved && message.userId === currentUserId}">
+      <!-- Use the computed property 'messages' here -->
+      <div
+        v-for="message in messages"
+        :key="message.id"
+        :class="{
+          'message-item': true,
+          'pending-message': !message.approved && (message.userId === currentUserId || isAdmin)
+        }"
+      >
         <p class="message-meta">
           <strong class="username">{{ message.username }}</strong>
           <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
@@ -20,7 +27,10 @@
           </button>
         </p>
         <p class="message-text">{{ message.text }}</p>
-        <p v-if="!message.approved && message.userId === currentUserId" class="pending-label">
+        <p
+          v-if="!message.approved && (message.userId === currentUserId || isAdmin)"
+          class="pending-label"
+        >
           {{ $t("pendingApproval") }}
         </p>
       </div>
@@ -30,8 +40,16 @@
 
 <script>
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, doc, orderBy, query, onSnapshot } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  orderBy,
+  query,
+  onSnapshot
+} from "firebase/firestore";
+import { getAuth, signOut } from "firebase/auth";
 import { useI18n } from "vue-i18n";
 
 export default {
@@ -42,14 +60,28 @@ export default {
   },
   data() {
     return {
-      messages: [],
+      // We'll store all Firestore messages here unfiltered
+      rawMessages: [],
       newMessage: "",
-      currentUserId: localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`,
+      currentUserId:
+        localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`,
       currentUsername: this.$t("anonymous"),
-      isAdmin: false,
+      isAdmin: false
     };
   },
-  async mounted() {
+  computed: {
+    // This computed property filters rawMessages based on user and admin status
+    messages() {
+      return this.rawMessages.filter((message) => {
+        return (
+          message.approved ||
+          message.userId === this.currentUserId ||
+          this.isAdmin
+        );
+      });
+    }
+  },
+  mounted() {
     localStorage.setItem("userId", this.currentUserId);
     this.checkUser();
     this.listenForMessages();
@@ -58,25 +90,22 @@ export default {
     listenForMessages() {
       const q = query(collection(db, "messageBoard"), orderBy("createdAt", "desc"));
       onSnapshot(q, (snapshot) => {
-        this.messages = snapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .filter(
-            (message) => 
-              message.approved || 
-              message.userId === this.currentUserId ||  
-              this.isAdmin  
-          );
+        // Simply store ALL messages in rawMessages, no filtering here
+        this.rawMessages = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
       });
     },
     async submitMessage() {
       if (!this.newMessage.trim()) return;
 
       await addDoc(collection(db, "messageBoard"), {
-        userId: this.currentUserId,  
-        username: this.currentUsername,  
+        userId: this.currentUserId,
+        username: this.currentUsername,
         text: this.newMessage,
         createdAt: new Date(),
-        approved: false,
+        approved: false
       });
 
       this.newMessage = "";
@@ -86,26 +115,43 @@ export default {
     },
     formatDate(date) {
       if (!date) return "";
-      return new Date(date.seconds * 1000).toLocaleTimeString(undefined, { 
-        hour: "2-digit", 
-        minute: "2-digit" 
+      return new Date(date.seconds * 1000).toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit"
       });
     },
     checkUser() {
       const auth = getAuth();
-      auth.onAuthStateChanged(async (user) => {
+      auth.onAuthStateChanged((user) => {
         if (user) {
           this.currentUserId = user.uid;
           this.currentUsername = user.displayName || user.email.split("@")[0];
           const adminEmails = ["jesse.bou@outlook.com", "am@am.com"];
           this.isAdmin = adminEmails.includes(user.email);
         } else {
-          this.currentUserId = localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`;
+          this.currentUserId =
+            localStorage.getItem("userId") ||
+            `guest_${Math.random().toString(36).substr(2, 9)}`;
           localStorage.setItem("userId", this.currentUserId);
           this.currentUsername = this.$t("anonymous");
           this.isAdmin = false;
         }
       });
+    },
+    async logout() {
+      const auth = getAuth();
+      await signOut(auth);
+
+      // Clear localStorage user ID
+      localStorage.removeItem("userId");
+
+      // Reset local data
+      this.currentUserId = `guest_${Math.random().toString(36).substr(2, 9)}`;
+      this.currentUsername = this.$t("anonymous");
+      this.isAdmin = false;
+
+      // Optionally re-run checkUser or just rely on this reset
+      // this.checkUser();
     }
   }
 };
