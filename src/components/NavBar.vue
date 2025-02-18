@@ -1,6 +1,12 @@
 <template>
   <nav class="navbar">
     <!-- Navigation Links (using vue-i18n keys) -->
+    <a
+      href="mailto:your-email@example.com"
+      class="contact-btn"
+    >
+      {{ t('contactMe') }}
+    </a>
     <ul class="nav-links">
       <li>
         <router-link to="/">
@@ -391,11 +397,26 @@ export default {
   border-radius: 8px;
   transition: all 0.3s ease;
   margin-left: 20px;
+  margin-right: 20px;
 }
 
 .lang-toggle:hover {
   background: #42b883;
 }
+.contact-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;      /* remove underline */
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin-right: 20px;         /* space from nav links */
+}
 
+.contact-btn:hover {
+  background: #42b883;
+  color: #fff;
+}
 
 </style>
