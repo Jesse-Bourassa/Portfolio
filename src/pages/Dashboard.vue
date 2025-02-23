@@ -69,10 +69,9 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 1000px;
-  min-width: 100vh;
-  min-height: 100px;
+  /* Instead of fixed height, use a min-height */
+  min-height: 100vh;
+  width: 100%;
   background: rgba(0, 0, 0, 0.5);
 }
 
@@ -82,6 +81,7 @@ export default {
   margin-bottom: 2.5rem;
 }
 
+/* Pending Messages Container */
 .pending-messages {
   background: rgba(255, 255, 255, 0.1);
   padding: 2rem;
@@ -94,18 +94,20 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-h2 {
+.pending-messages h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
   text-align: center;
 }
 
+/* Messages Container */
 .messages-container {
   max-height: 500px;
   overflow-y: auto;
   padding: 1.5rem;
 }
 
+/* Individual Message Items */
 .message-item {
   padding: 1.8rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
@@ -142,6 +144,7 @@ h2 {
   margin: 15px 0;
 }
 
+/* Button Group */
 .button-group {
   display: flex;
   justify-content: center;
@@ -149,19 +152,20 @@ h2 {
   margin-top: 1rem;
 }
 
-.approve-btn, .delete-btn {
+.approve-btn,
+.delete-btn {
   padding: 14px 28px;
   border-radius: 10px;
   cursor: pointer;
   font-size: 1.3rem;
   font-weight: bold;
   transition: 0.3s ease-in-out;
+  border: none;
 }
 
 .approve-btn {
   background: #28a745;
   color: white;
-  border: none;
 }
 
 .approve-btn:hover {
@@ -171,7 +175,6 @@ h2 {
 .delete-btn {
   background: #dc3545;
   color: white;
-  border: none;
 }
 
 .delete-btn:hover {
@@ -183,5 +186,88 @@ h2 {
   color: #ccc;
   text-align: center;
   margin-top: 1.5rem;
+}
+
+/* RESPONSIVE STYLES */
+
+/* Tablet (max-width: 768px) */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 3rem 1.5rem;
+  }
+  .title {
+    font-size: 2.8rem;
+    margin-bottom: 2rem;
+  }
+  .pending-messages {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .pending-messages h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  .message-item {
+    padding: 1.2rem;
+    font-size: 1.3rem;
+  }
+  .message-meta {
+    font-size: 1.3rem;
+  }
+  .username {
+    font-size: 1.4rem;
+  }
+  .timestamp {
+    font-size: 1rem;
+  }
+  .message-text {
+    font-size: 1.6rem;
+  }
+  .approve-btn, .delete-btn {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+  }
+}
+
+/* Phone (max-width: 480px) */
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 2rem 1rem;
+  }
+  .title {
+    font-size: 2.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .pending-messages {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .pending-messages h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .message-item {
+    padding: 1rem;
+    font-size: 1.2rem;
+  }
+  .message-meta {
+    font-size: 1.2rem;
+  }
+  .username {
+    font-size: 1.3rem;
+  }
+  .timestamp {
+    font-size: 0.9rem;
+  }
+  .message-text {
+    font-size: 1.4rem;
+  }
+  .approve-btn, .delete-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+  .no-messages {
+    font-size: 1.4rem;
+  }
 }
 </style>

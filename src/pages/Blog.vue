@@ -162,29 +162,36 @@ export default {
   text-align: center;
   padding: 2rem;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+/* Form Input: Use 100% width with a max-width */
 .message-form input {
   padding: 10px;
   font-size: 1rem;
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
 }
 
+/* Message Container: Use full width of container with a max-width */
 .message-container {
   background: rgba(40, 40, 40, 0.9);
   padding: 1rem;
   border-radius: 8px;
   margin-top: 1rem;
-  width: 200%;
-  height: 72%;
+  width: 100%;
+  max-width: 800px;
+  /* Let height adjust automatically (or use a max-height if desired) */
+  max-height: 70vh;
   overflow-y: auto;
   text-align: left;
 }
 
+/* Message Items */
 .message-item {
   padding: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -235,5 +242,51 @@ export default {
   padding: 6px 12px;
   cursor: pointer;
   font-size: 1rem;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+
+/* For tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .message-board {
+    padding: 1rem;
+  }
+  .message-form input {
+    font-size: 0.9rem;
+  }
+  .message-meta {
+    font-size: 1.2rem;
+  }
+  .username {
+    font-size: 1.3rem;
+  }
+  .timestamp {
+    font-size: 1.1rem;
+  }
+  .message-text {
+    font-size: 1.4rem;
+  }
+}
+
+/* For phones (max-width: 480px) */
+@media (max-width: 480px) {
+  .message-board {
+    padding: 0.5rem;
+  }
+  .message-form input {
+    font-size: 0.8rem;
+  }
+  .message-meta {
+    font-size: 1rem;
+  }
+  .username {
+    font-size: 1.1rem;
+  }
+  .timestamp {
+    font-size: 1rem;
+  }
+  .message-text {
+    font-size: 1.2rem;
+  }
 }
 </style>

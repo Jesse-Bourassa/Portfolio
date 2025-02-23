@@ -1,21 +1,21 @@
 <template>
   <div class="home-container">
     <!-- Profile Card with fade-out effect -->
-    <div
-      v-animateonscroll="{ enterClass: 'animate-fadein'}"
-      class="card-wrapper"
-    >
-      <ProfileCard />
-    </div>
+    <div 
+  class="card-wrapper" 
+  v-scroll-animation="{ enterClass: 'animate-fadein'}"
+>
+  <ProfileCard />
+</div>
 
     <!-- Spacer -->
     <div class="spacer"></div>
 
     <!-- About Card with fade-in effect -->
-    <div
-      v-animateonscroll="{ enterClass: 'animate-fadein'}"
-      class="card-wrapper"
-    >
+    <div 
+  class="card-wrapper" 
+  v-scroll-animation="{ enterClass: 'animate-fadein'}"
+>
       <AboutCard />
     </div>
 
@@ -24,8 +24,8 @@
 
     <!-- Projects Section -->
     <div 
-    v-animateonscroll="{ enterClass: 'animate-fadein'}"
-    class="card-wrapper" >
+  class="card-wrapper" 
+  v-scroll-animation="{ enterClass: 'animate-fadein'}">
       <div class="projects-section">
         <h2>{{ $t("projects") }}</h2>
         <!-- "Add Project" Button -->
@@ -84,9 +84,9 @@
     <div class="spacer"></div>
 
     <!-- Experience Section -->
-    <div
-      v-animateonscroll="{ enterClass: 'animate-fadeleft', leaveClass: 'animate-fadeoutleft' }"
-      class="card-wrapper"
+    <div 
+  class="card-wrapper" 
+  v-scroll-animation="{ enterClass: 'animate-fadein'}"
     >
       <div class="experience-section">
         <h2>{{ $t("experienceTitle") }}</h2>
@@ -257,7 +257,6 @@ export default {
 
 .projects-section {
   text-align: center;
-
   padding: 10px;
 }
 
@@ -320,18 +319,21 @@ export default {
   background-color: #36a573;
 }
 
+/* Adjusted for better responsiveness */
 .project-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 4rem;
+  /* Decrease min width so it fits better on smaller screens */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem; 
   justify-content: center;
   align-items: stretch;
 }
+
 .project-item {
   position: relative;
 }
 
-/* Inline admin button styles (if you keep them) */
+/* Admin button styles (if you keep them) */
 .edit-button {
   position: absolute;
   top: -15px;
@@ -348,12 +350,10 @@ export default {
   transition: background-color 0.3s ease, transform 0.2s ease;
   z-index: 10;
 }
-
 .edit-button i {
   color: white;
   font-size: 1.2rem;
 }
-
 .edit-button:hover {
   background-color: #36a573;
   transform: scale(1.1);
@@ -374,16 +374,83 @@ export default {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  
 }
-
 .delete-button i {
   color: white;
   font-size: 1.2rem;
 }
-
 .delete-button:hover {
   background: #c0392b;
   transform: scale(1.1);
+}
+
+/* Animations (fade in/out) */
+@keyframes fadein {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fadein {
+  animation: fadein 1s ease-out forwards;
+}
+@keyframes fadeout {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+.animate-fadeout {
+  animation: fadeout 1s ease-out forwards;
+}
+
+/* =========================
+   MEDIA QUERIES
+   ========================= */
+
+/* Tablet breakpoint (max-width: 768px) */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 1rem; 
+  }
+  .card-wrapper {
+    margin: 1rem;
+  }
+  .spacer {
+    height: 10vh;
+  }
+  .projects-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  .project-cards {
+    grid-template-columns: 1fr; /* single column on smaller tablets */
+    gap: 2rem;
+  }
+  .add-project-button {
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Phone breakpoint (max-width: 480px) */
+@media (max-width: 480px) {
+  .home-container {
+    padding: 0.5rem;
+  }
+  .card-wrapper {
+    margin: 0.5rem;
+  }
+  .spacer {
+    height: 8vh;
+  }
+  .projects-section h2 {
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+  }
+  .project-cards {
+    gap: 1.5rem;
+  }
+  .add-project-button {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+  }
 }
 </style>
