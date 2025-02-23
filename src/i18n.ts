@@ -5,7 +5,7 @@ import type { I18nOptions } from 'vue-i18n'; // ✅ Import type separately
 // Define translations
 const messages = {
   en: {
-    home: "1Home",
+    home: "1343Home",
     messageBoard: "Message Board",
     dashboard: "Dashboard",
     adminLogin: "Admin Login",
