@@ -5,10 +5,14 @@ import type { I18nOptions } from 'vue-i18n'; // ✅ Import type separately
 // Define translations
 const messages = {
   en: {
+<<<<<<< HEAD
     confirmDeleteTitle: "Confirm Delete",
     confirmDeleteMessage: "Are you sure you want to delete this project?",
     confirmDeleteMessages: "Are you sure you want to delete this message?",
     home: "Home",
+=======
+    home: "1343Home",
+>>>>>>> dc3055fcb0efcfe4c04922176ac57bd339fe4ed4
     messageBoard: "Message Board",
     dashboard: "Dashboard",
     adminLogin: "Admin Login",
