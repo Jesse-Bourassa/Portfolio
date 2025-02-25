@@ -27,9 +27,9 @@
 
     <!-- RIGHT: Desktop "Contact Me," language toggle, auth circle, hamburger -->
     <div class="nav-right">
-      <a href="mailto:jesse.bou@outlook.com" class="contact-btn desktop-only">
-        {{ t("contactMe") }}
-      </a>
+      <button @click="openContactModal" class="contact-btn desktop-only">
+  {{ t("contactMe") }}
+</button>
       <button @click="toggleLanguage" class="lang-toggle">
         {{ locale === "en" ? "🇫🇷 FR" : "🇬🇧 EN" }}
       </button>
@@ -64,13 +64,9 @@
           </router-link>
         </li>
         <li>
-          <a
-            href="mailto:jesse.bou@outlook.com"
-            class="contact-btn"
-            @click="toggleMobileMenu"
-          >
-            {{ t("contactMe") }}
-          </a>
+          <button @click="openContactModal" class="contact-btn desktop-only">
+  {{ t("contactMe") }}
+</button>
         </li>
       </ul>
     </transition>
@@ -98,6 +94,20 @@
         </div>
       </div>
     </div>
+    
+    <div v-if="showContactModal" class="custom-modal-overlay" @click.self="closeContactModal">
+  <div class="custom-modal">
+    <h2>{{ t("contactMe") }}</h2>
+    <input type="email" v-model="contactEmail" :placeholder="t('yourEmail')" />
+    <input type="text" v-model="contactSubject" :placeholder="t('subject')" />
+    <textarea v-model="contactMessage" :placeholder="t('message')"></textarea>
+    <div class="modal-buttons">
+      <button @click="closeContactModal">{{ t("cancel") }}</button>
+      <button @click="submitContactForm">{{ t("send") }}</button>
+    </div>
+  </div>
+</div>
+
   </nav>
 </template>
 
@@ -106,12 +116,63 @@ import { inject, ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "../firebase";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import emailjs from "emailjs-com";
+
 
 export default {
   name: "NavBar",
   setup() {
     const isAdmin = inject("isAdmin");
     const { t, locale } = useI18n();
+
+    const showContactModal = ref(false);
+    const contactEmail = ref("");
+    const contactSubject = ref("");
+    const contactMessage = ref("");
+
+    const openContactModal = () => {
+      console.log("Opening Contact Modal..."); // Debugging log
+
+      showContactModal.value = true;
+    };
+    const closeContactModal = () => {
+      showContactModal.value = false;
+      contactEmail.value = "";
+      contactSubject.value = "";
+      contactMessage.value = "";
+    };
+
+    const submitContactForm = () => {
+      if (!contactEmail.value || !contactSubject.value || !contactMessage.value) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      // Replace with your EmailJS service details
+      const serviceID = "service_t242dhs"; 
+      const templateID = "template_pzau1x6"; 
+      const userID = "yWes8mfgaVRTMi-pq"; 
+
+      const templateParams = {
+        to_email: "jesse.bou@outlook.com",
+        from_email: contactEmail.value, // Sender's email
+        subject: contactSubject.value,  // Subject entered by user
+        message: contactMessage.value,  // Message entered by user
+      };
+
+      emailjs
+        .send(serviceID, templateID, templateParams, userID)
+        .then(
+          () => {
+            alert("Message sent successfully!");
+            closeContactModal();
+          },
+          (error) => {
+            console.error("Failed to send email:", error);
+            alert("Failed to send message.");
+          }
+        );
+    };
 
     // Login modal
     const loginEmail = ref("");
@@ -200,6 +261,13 @@ export default {
       closeLoginModal,
       confirmLogin,
       handleLogout,
+      showContactModal,
+      contactEmail,
+      contactSubject,
+      contactMessage,
+      openContactModal,
+      closeContactModal,
+      submitContactForm,
     };
   },
 };
