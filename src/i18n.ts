@@ -5,6 +5,9 @@ import type { I18nOptions } from 'vue-i18n'; // ✅ Import type separately
 // Define translations
 const messages = {
   en: {
+    confirmDeleteTitle: "Confirm Delete",
+    confirmDeleteMessage: "Are you sure you want to delete this project?",
+    confirmDeleteMessages: "Are you sure you want to delete this message?",
     home: "Home",
     messageBoard: "Message Board",
     dashboard: "Dashboard",
@@ -58,6 +61,9 @@ const messages = {
       "I'm currently a student honing my skills and actively looking for an internship or entry-level opportunity to kickstart my career. If you're looking for someone passionate about learning and growing, let's connect!"
   },
   fr: {
+    confirmDeleteTitle: "Confirmer la suppression",
+    confirmDeleteMessage: "Êtes-vous sûr de vouloir supprimer ce projet?",  
+    confirmDeleteMessages: "Êtes-vous sûr de vouloir supprimer ce messages?",  
     home: "Accueil",
     messageBoard: "Tableau de Messages",
     dashboard: "Tableau de Bord",

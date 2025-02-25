@@ -22,7 +22,7 @@
           <span class="timestamp">{{ formatDate(message.createdAt) }}</span>
            
           <!-- Admin Delete Button -->
-          <button v-if="isAdmin" @click="deleteMessage(message.id)" class="delete-btn">
+          <button v-if="isAdmin" @click="confirmDelete(message.id)" class="delete-btn">
             {{ $t("delete") }}
           </button>
         </p>
@@ -35,6 +35,18 @@
         </p>
       </div>
     </div>
+    <teleport to="body">
+      <div v-if="showDeleteModal" class="modal-overlay">
+        <div class="modal">
+          <h2>{{ $t("confirmDeleteTitle") }}</h2>
+          <p>{{ $t("confirmDeleteMessages") }}</p>
+          <div class="modal-buttons">
+            <button @click="showDeleteModal = false">{{ $t("cancel") }}</button>
+            <button @click="deleteMessage" class="confirm-delete">{{ $t("delete") }}</button>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
@@ -63,6 +75,8 @@ export default {
       // We'll store all Firestore messages here unfiltered
       rawMessages: [],
       newMessage: "",
+      showDeleteModal: false, // Controls the delete confirmation pop-up
+      messageToDelete: null,
       currentUserId:
         localStorage.getItem("userId") || `guest_${Math.random().toString(36).substr(2, 9)}`,
       currentUsername: this.$t("anonymous"),
@@ -110,8 +124,16 @@ export default {
 
       this.newMessage = "";
     },
-    async deleteMessage(messageId) {
-      await deleteDoc(doc(db, "messageBoard", messageId));
+    confirmDelete(messageId) {
+      this.messageToDelete = messageId;
+      this.showDeleteModal = true;
+    },
+    async deleteMessage() {
+      if (this.messageToDelete) {
+        await deleteDoc(doc(db, "messageBoard", this.messageToDelete));
+        this.showDeleteModal = false;
+        this.messageToDelete = null;
+      }
     },
     formatDate(date) {
       if (!date) return "";
@@ -288,5 +310,58 @@ export default {
   .message-text {
     font-size: 1.2rem;
   }
+}
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #2e2e2e;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.confirm-delete {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.confirm-delete:hover {
+  background: #c0392b;
+}
+
+/* Delete Button */
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 5px;
+}
+
+.delete-btn:hover {
+  background: darkred;
 }
 </style>

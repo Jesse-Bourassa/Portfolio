@@ -4,9 +4,9 @@
     <button v-if="isAdmin" @click="editProject" class="edit-button">
       <i class="pi pi-pencil"></i>
     </button>
-    <button v-if="isAdmin" @click="deleteProject" class="delete-button">
-      <i class="pi pi-trash"></i>
-    </button>
+    <button v-if="isAdmin" @click="showDeleteModal = true" class="delete-button">
+        <i class="pi pi-trash"></i>
+      </button>
 
     <!-- Project Details -->
     <h3 class="project-title">{{ title }}</h3>
@@ -30,11 +30,25 @@
         <p>{{ $t("github") }}</p>
       </a>
     </div>
+    <teleport to="body">
+      <div v-if="showDeleteModal" class="modal-overlay">
+        <div class="modal">
+          <h2>{{ t("confirmDeleteTitle") }}</h2>
+          <p>{{ t("confirmDeleteMessage") }}</p>
+          <div class="modal-buttons">
+            <button @click="showDeleteModal = false">{{ t("cancel") }}</button>
+            <button @click="confirmDelete" class="confirm-delete">
+              {{ t("delete") }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
 <script>
-import { inject, computed } from "vue";
+import { inject, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 export default {
@@ -49,19 +63,24 @@ export default {
   setup(props, { emit }) {
     const { t } = useI18n();
     const isAdmin = inject("isAdmin", false);
+    const showDeleteModal = ref(false);
+
 
     const editProject = () => {
       emit("edit-project");
     };
 
-    const deleteProject = () => {
+    const confirmDelete = () => {
       emit("delete-project");
+      showDeleteModal.value = false;
     };
+
 
     return {
       isAdmin,
+      showDeleteModal,
       editProject,
-      deleteProject,
+      confirmDelete,
       t
     };
   }
@@ -192,5 +211,34 @@ export default {
 .delete-button:hover {
   background: #c0392b;
   transform: scale(1.1);
+}
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #2e2e2e;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.confirm-delete {
+  background: #e74c3c;
 }
 </style>

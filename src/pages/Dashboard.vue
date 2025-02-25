@@ -12,14 +12,27 @@
           <p class="message-text">{{ message.text }}</p>
           <div class="button-group">
             <button @click="approveMessage(message.id)" class="approve-btn">{{ $t("approve") }}</button>
-            <button @click="deleteMessage(message.id)" class="delete-btn">{{ $t("delete") }}</button>
+            <button @click="confirmDelete(message.id)" class="delete-btn">{{ $t("delete") }}</button>
           </div>
         </div>
       </div>
       <p v-else class="no-messages">{{ $t("noMessages") }}</p>
     </div>
+    <teleport to="body">
+      <div v-if="showDeleteModal" class="modal-overlay">
+        <div class="modal">
+          <h2>{{ $t("confirmDeleteTitle") }}</h2>
+          <p>{{ $t("confirmDeleteMessages") }}</p>
+          <div class="modal-buttons">
+            <button @click="showDeleteModal = false">{{ $t("cancel") }}</button>
+            <button @click="deleteMessage" class="confirm-delete">{{ $t("delete") }}</button>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
+
 
 <script>
 import { db } from "../firebase";
@@ -30,14 +43,16 @@ export default {
   name: "AdminDashboard",
   data() {
     return {
-      pendingMessages: []
+      pendingMessages: [],
+      showDeleteModal: false,
+      messageToDelete: null
     };
   },
   setup() {
     const { t } = useI18n(); // Use translation
     return { t };
   },
-  async mounted() {
+  mounted() {
     this.fetchPendingMessages();
   },
   methods: {
@@ -50,8 +65,22 @@ export default {
     async approveMessage(messageId) {
       await updateDoc(doc(db, "messageBoard", messageId), { approved: true });
     },
-    async deleteMessage(messageId) {
-      await deleteDoc(doc(db, "messageBoard", messageId));
+    confirmDelete(messageId) {
+      console.log("Confirm delete for message ID:", messageId); // Debugging
+      this.messageToDelete = messageId;
+      this.showDeleteModal = true;
+    },
+    async deleteMessage() {
+      if (!this.messageToDelete) return;
+
+      try {
+        await deleteDoc(doc(db, "messageBoard", this.messageToDelete));
+        console.log("Message deleted:", this.messageToDelete);
+        this.showDeleteModal = false;
+        this.messageToDelete = null;
+      } catch (error) {
+        console.error("Error deleting message:", error);
+      }
     },
     formatDate(date) {
       if (!date) return "";
@@ -62,6 +91,59 @@ export default {
 </script>
 
 <style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #2e2e2e;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.confirm-delete {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.confirm-delete:hover {
+  background: #c0392b;
+}
+
+/* Delete Button */
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 5px;
+}
+
+.delete-btn:hover {
+  background: darkred;
+}
 .dashboard {
   text-align: center;
   padding: 4rem 2rem;
