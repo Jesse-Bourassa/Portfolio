@@ -1,18 +1,10 @@
 version: "3.8"
-
 services:
-  my-app:
-    container_name: my-app
-    image: my-app
-    build: .
-    restart: unless-stopped
+  vue-portfolio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vue-portfolio
     ports:
-      - "8080:4173" # Vite preview runs on port 4173 by default
-    environment:
-      - NODE_ENV=production
-    networks:
-      - my-network
-
-networks:
-  my-network:
-    driver: bridge
+      - "80:80"
+    restart: always
