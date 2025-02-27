@@ -6,5 +6,5 @@ services:
       dockerfile: Dockerfile
     container_name: vue-portfolio
     ports:
-      - "8080:80"
+      - "8085:80"
     restart: always
