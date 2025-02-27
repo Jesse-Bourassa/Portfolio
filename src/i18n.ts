@@ -1,3 +1,4 @@
+import { send } from 'emailjs-com';
 import { createI18n } from 'vue-i18n';
 import type { I18nOptions } from 'vue-i18n'; // ✅ Import type separately
 
@@ -5,6 +6,7 @@ import type { I18nOptions } from 'vue-i18n'; // ✅ Import type separately
 // Define translations
 const messages = {
   en: {
+    send: "Send",
     confirmDeleteTitle: "Confirm Delete",
     confirmDeleteMessage: "Are you sure you want to delete this project?",
     confirmDeleteMessages: "Are you sure you want to delete this message?",
@@ -61,6 +63,7 @@ const messages = {
       "I'm currently a student honing my skills and actively looking for an internship or entry-level opportunity to kickstart my career. If you're looking for someone passionate about learning and growing, let's connect!"
   },
   fr: {
+    send: "Envoyer",
     confirmDeleteTitle: "Confirmer la suppression",
     confirmDeleteMessage: "Êtes-vous sûr de vouloir supprimer ce projet?",  
     confirmDeleteMessages: "Êtes-vous sûr de vouloir supprimer ce messages?",  

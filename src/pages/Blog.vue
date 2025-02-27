@@ -3,8 +3,10 @@
     <h1 class="title">{{ $t("messageBoard") }}</h1>
 
     <form @submit.prevent="submitMessage" class="message-form">
+      <input v-model="tempName" :placeholder="$t('yourName')"/>
+      
       <input v-model="newMessage" :placeholder="$t('writeMessage')" required />
-      <button type="submit">{{ $t("post") }}</button>
+      <button type="submit" class="post-btn">{{ $t("post") }}</button>
     </form>
 
     <div class="message-container">
@@ -63,6 +65,7 @@ import {
 } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import { useI18n } from "vue-i18n";
+import Spacer from "../components/Spacer.vue";
 
 export default {
   name: "MessageBoard",
@@ -75,6 +78,7 @@ export default {
       // We'll store all Firestore messages here unfiltered
       rawMessages: [],
       newMessage: "",
+      tempName: "",          // <--- New field for user to enter their name
       showDeleteModal: false, // Controls the delete confirmation pop-up
       messageToDelete: null,
       currentUserId:
@@ -114,9 +118,11 @@ export default {
     async submitMessage() {
       if (!this.newMessage.trim()) return;
 
+      const finalUsername = this.tempName.trim() || this.currentUsername;
+      
       await addDoc(collection(db, "messageBoard"), {
         userId: this.currentUserId,
-        username: this.currentUsername,
+        username: finalUsername,
         text: this.newMessage,
         createdAt: new Date(),
         approved: false
@@ -363,5 +369,18 @@ export default {
 
 .delete-btn:hover {
   background: darkred;
+}
+.post-btn {
+  background-color: #3498db; /* Blue */
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+.post-btn:hover {
+  background-color: #2980b9; /* Darker blue on hover */
 }
 </style>

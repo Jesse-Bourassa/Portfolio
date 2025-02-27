@@ -593,41 +593,80 @@ export default {
 
 .custom-modal h2 {
   color: #fff;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-shadow: none; /* Remove strong text shadow */
 }
 
-.custom-modal input {
+/* =======================
+   FORM INPUTS
+   ======================= */
+.custom-modal input,
+.custom-modal textarea {
   width: 100%;
   padding: 1rem;
-  margin: 1rem 0;
+  margin: 0.75rem 0;
   border: none;
   border-radius: 8px;
-  background: #444;
+  background: #333;       /* Slightly lighter background than modal */
   color: #fff;
   font-size: 1rem;
+  outline: none;          /* Remove default outline on focus */
+  transition: background 0.3s;
 }
 
+.custom-modal input::placeholder,
+.custom-modal textarea::placeholder {
+  color: #aaa;            /* Subtle placeholder color */
+}
+
+.custom-modal input:focus,
+.custom-modal textarea:focus {
+  background: #3a3a3a;    /* Slight highlight on focus */
+}
+
+/* Make the textarea a bit bigger by default */
+.custom-modal textarea {
+  min-height: 120px;
+  resize: vertical;       /* Let user resize vertically if needed */
+}
+
+/* =======================
+   MODAL BUTTONS
+   ======================= */
 .modal-buttons {
   display: flex;
-  justify-content: space-around;
-  margin-top: 1rem;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .modal-buttons button {
-  padding: 0.7rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  transition: background 0.3s;
   font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.3s, color 0.3s;
 }
 
-.modal-buttons button:hover {
+/* Primary (Send) Button */
+.modal-buttons button:last-child {
   background: #42b883;
   color: #fff;
+}
+.modal-buttons button:last-child:hover {
+  background: #36a977;
+}
+
+/* Secondary (Cancel) Button */
+.modal-buttons button:first-child {
+  background: #444;
+  color: #fff;
+}
+.modal-buttons button:first-child:hover {
+  background: #555;
 }
 </style>
