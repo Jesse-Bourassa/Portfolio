@@ -1,7 +1,7 @@
 # -------------------------------------------------------
 # Stage 1: Build the Vue.js application
 # -------------------------------------------------------
-    FROM node:16-alpine AS build
+    FROM node:18-alpine AS build
 
     # Create app directory
     WORKDIR /app
